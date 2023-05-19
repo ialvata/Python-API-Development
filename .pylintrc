@@ -1,0 +1,5 @@
+; We need this to avoid
+; main.py:2:0: E0611: No name 'BaseModel' in module 'pydantic' (no-name-in-module)
+
+[MASTER]
+extension-pkg-whitelist=pydantic
