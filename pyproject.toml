@@ -9,6 +9,8 @@ packages = [{include = "python_api_development"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+black = "^23.3.0"
+pre-commit = "^3.3.2"
 
 
 [build-system]
