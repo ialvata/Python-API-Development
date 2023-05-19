@@ -2,3 +2,6 @@
 Poetry automatically creates a virtual environment, when we add our first package.
 Activating Poetry virtual environment:
     source $(poetry env info --path)/bin/activate
+
+Activating our server app:
+    uvicorn main:app --reload
