@@ -104,5 +104,20 @@ def delete_post(identifier: int):
     myposts.remove(post_wanted)
 
 
+@app.patch("/posts/{identifier}", status_code=status.HTTP_200_OK)
+def patch_post(identifier: int, payload: Post):
+    """
+    function docstring
+    """
+    post_wanted = find_post(identifier)
+    if post_wanted is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id {identifier} not found!",
+        )
+    post_wanted.update(payload)
+    return {"fetched_post": post_wanted}
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="localhost", port=8001)
