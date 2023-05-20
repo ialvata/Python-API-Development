@@ -3,5 +3,11 @@ Poetry automatically creates a virtual environment, when we add our first packag
 Activating Poetry virtual environment:
     source $(poetry env info --path)/bin/activate
 
+Also, it seems that $PYTHONPATH is empty, when using Poetry.
+So, cd to the root level of this project directory and do:
+    export PYTHONPATH=$PWD
+
+Without this, you'll get `module not found` error messages.
+
 Activating our server app:
-    uvicorn main:app --reload
+    uvicorn app.main:app --reload
