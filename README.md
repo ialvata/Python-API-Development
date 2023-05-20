@@ -1,5 +1,20 @@
 # Python-API-Development
 
+[![alt text][image]][hyperlink]
+
+[hyperlink]: https://youtu.be/0sOvCWFmrtA
+[image]:
+https://github.com/ialvata/Python-API-Development/assets/110241614/6ee51d95-4301-4857-9765-5784aa2d1548
+(Screenshot of YouTube Video Course)
+
+
+
+
+This will be my interpretation of the Python API Development 20h course from Sanjeev Thiyagarajan on Youtube. :) 
+
+[Link to YouTube](https://www.youtube.com/watch?v=0sOvCWFmrtA&ab_channel=freeCodeCamp.org)
+
+
 
 ## Pre-Commit Hooks
 - Black:Python code formatter. Character line length optimised for my screen.
