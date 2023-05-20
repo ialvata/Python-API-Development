@@ -1,13 +1,21 @@
+After some trial and errors... Poetry is really not suitable/easy to manage the virtual env,
+so..
+First create a venv:
+    python3 -m venv /path/to/new/virtual/environment
 
-Poetry automatically creates a virtual environment, when we add our first package.
-Activating Poetry virtual environment:
-    source $(poetry env info --path)/bin/activate
+In your venv bin/activate script, add the following line:
+    PYTHONPATH="/path/to/root/level"
+    export PYTHONPATH
 
-Also, it seems that $PYTHONPATH is empty, when using Poetry.
-So, cd to the root level of this project directory and do:
-    export PYTHONPATH=$PWD
+Now activate it, and install poetry inside the venv.
+Do:
+    poetry install
+or
+    poetry add <package>
 
-Without this, you'll get `module not found` error messages.
+After installing pytest, we may need to deactivate the venv and reactivate it again.
+    deactivate && source .env/bin/activate
+or just close VSCode and open it again.
 
 Activating our server app:
     uvicorn app.main:app --reload

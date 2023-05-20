@@ -87,7 +87,7 @@ def get_post(identifier: int):
             detail=f"Post with id {identifier} not found!",
         )
     # response.status_code = status.HTTP_404_NOT_FOUND
-    return {"fetched_post": post_wanted[0]}
+    return {"fetched_post": post_wanted}
 
 
 @app.delete("/posts/{identifier}", status_code=status.HTTP_204_NO_CONTENT)
