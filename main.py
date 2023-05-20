@@ -64,14 +64,24 @@ def get_latest_post():
     return {"latest": myposts[len(myposts) - 1]}
 
 
+def find_post(identifier: int) -> dict | None:
+    """
+    function docstring
+    """
+    list_res = [post for post in myposts if post["id"] == identifier]
+    if list_res == []:
+        return None
+    return list_res[0]
+
+
 @app.get("/posts/{identifier}")
 def get_post(identifier: int):
     """
     function docstring
     """
-    post_wanted = [post for post in myposts if post["id"] == identifier]
+    post_wanted = find_post(identifier)
     print(post_wanted)
-    if post_wanted == []:
+    if post_wanted is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {identifier} not found!",
@@ -85,9 +95,9 @@ def delete_post(identifier: int):
     """
     function docstring
     """
-    post_wanted = [post for post in myposts if post["id"] == identifier]
-    if post_wanted != []:
-        myposts.remove(post_wanted[0])
+    post_wanted = find_post(identifier)
+    if post_wanted is not None:
+        myposts.remove(post_wanted)
 
 
 if __name__ == "__main__":
