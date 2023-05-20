@@ -56,6 +56,9 @@ def create_post(payload: Post):
     return incoming_post
 
 
+# path operations are evaluated in order,
+# you need to make sure that the path for /posts/latest
+# is declared before the one for /posts/{identifier}
 @app.get("/posts/latest")
 def get_latest_post():
     """
@@ -74,6 +77,8 @@ def find_post(identifier: int) -> dict | None:
     return list_res[0]
 
 
+# identifier is an example of a path parameter
+# we could also
 @app.get("/posts/{identifier}")
 def get_post(identifier: int):
     """
@@ -90,7 +95,8 @@ def get_post(identifier: int):
     return {"fetched_post": post_wanted}
 
 
-@app.delete("/posts/{identifier}", status_code=status.HTTP_204_NO_CONTENT)
+# here identifier is a Query parameter
+@app.delete("/posts", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(identifier: int):
     """
     function docstring
