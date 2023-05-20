@@ -57,11 +57,11 @@ def create_post(payload: Post):
 
 
 @app.get("/posts/{identifier}")
-def get_post(identifier):
+def get_post(identifier: int):
     """
     function docstring
     """
-    post_wanted = [post for post in myposts if post["id"] == int(identifier)]
+    post_wanted = [post for post in myposts if post["id"] == identifier]
     print(post_wanted)
     return {"fetched_post": post_wanted}
 
