@@ -96,8 +96,12 @@ def delete_post(identifier: int):
     function docstring
     """
     post_wanted = find_post(identifier)
-    if post_wanted is not None:
-        myposts.remove(post_wanted)
+    if post_wanted is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id {identifier} not found!",
+        )
+    myposts.remove(post_wanted)
 
 
 if __name__ == "__main__":
