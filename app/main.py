@@ -8,6 +8,8 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 
+from db.repository import PostgresDB
+
 
 class Post(BaseModel):
     """
@@ -20,12 +22,43 @@ class Post(BaseModel):
     rating: Optional[int] = None
 
 
-app = FastAPI()
-
-
-myposts = [Post(title=f"title_{idx}", content=f"content_{idx}").dict() for idx in range(10)]
+##########################    cached posts   ##########################
+myposts = [Post(title=f"title_{idx}", content=f"content_{idx}").dict() for idx in range(1, 11)]
 for post, idx in zip(myposts, range(len(myposts))):
     post.update({"id": idx})
+
+##########################    connecting to Postgres db    ##########################
+database = PostgresDB(filename="./db/database.ini", section="postgresql")
+cur = database.connect()
+
+#####################    creating some initial data in Postgres db    #######################
+cur.execute(
+    """
+    CREATE TABLE posts (
+        id serial PRIMARY KEY,
+        title varchar NOT NULL,
+        content varchar,
+        published boolean DEFAULT true,
+        created_at TIMESTAMP
+    );
+    """
+)
+for post in myposts:
+    cur.execute(
+        # pylint: disable = f-string-without-interpolation
+        f"""
+        INSERT INTO posts (title, content,published)
+        VALUES (%s,%s,%s)
+        """,
+        (post["title"], post["content"], post["published"]),
+    )
+
+    # posts = cur.fetchall() #fetchone
+    # print(posts)
+
+
+##############################    Creatng FastAPI App   ##########################
+app = FastAPI()
 
 
 @app.get("/")
@@ -41,7 +74,9 @@ def get_all_posts():
     """
     function docstring
     """
-    return {"data": myposts}
+    cur.execute("SELECT * FROM posts")
+    posts = cur.fetchall()
+    return {"data": posts}
 
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
