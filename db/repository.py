@@ -90,7 +90,7 @@ class PostgresDB:
             conn = psycopg2.connect(**self.config.dict())
             # create a cursor
             cur = conn.cursor()
-            if cursor:
+            if cur:
                 return cur
             return None
         except psycopg2.DatabaseError as error:
