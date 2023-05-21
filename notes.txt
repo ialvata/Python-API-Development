@@ -17,5 +17,8 @@ After installing pytest, we may need to deactivate the venv and reactivate it ag
     deactivate && source .env/bin/activate
 or just close VSCode and open it again.
 
+To install psycopg2, we first install:
+    sudo apt install libpq-dev python3-dev
+
 Activating our server app:
     uvicorn app.main:app --reload
