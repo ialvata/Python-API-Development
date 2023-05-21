@@ -7,7 +7,7 @@ services:
     volumes:
       - postgres_data:/usr/share/postgres/data
     env_file:
-      - ./.env.local.db
+      - ./db/.env.local.db
     # instead, we could have created a `environment` section, with
     # with the env vars in .env.local.db file.
   local_grafana:
@@ -18,7 +18,7 @@ services:
     volumes:
       - grafana_data:/usr/share/grafana/data
     env_file:
-      - ./.env.local.grafana
+      - ./grafana/.env.local.grafana
 volumes:
   postgres_data:
   grafana_data:
