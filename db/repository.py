@@ -4,13 +4,13 @@ I would usually separate into different modules the parent class from the subcla
 this situation the number of code lines is too few to justify it...
 """
 from configparser import ConfigParser
-from typing import Optional, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 import psycopg2
 from psycopg2._psycopg import cursor  # pylint: disable = no-name-in-module
 from pydantic import BaseModel
 
-from db.utils import ConfigEmptyError, ConfigFormatError
+from db.utils import ConfigEmptyError, ConfigFormatError, CursorNoneError
 
 
 class ConfigDB(BaseModel):
@@ -81,7 +81,7 @@ class PostgresDB:
         if not hasattr(self, "config"):
             raise ConfigEmptyError
 
-    def connect(self) -> Optional[cursor]:
+    def connect(self) -> cursor:
         """Connect to the PostgreSQL database server"""
         conn = None
         try:
@@ -92,10 +92,10 @@ class PostgresDB:
             cur = conn.cursor()
             if cur:
                 return cur
-            return None
+            raise CursorNoneError
         except psycopg2.DatabaseError as error:
             print(error)
-            return None
+            raise error
 
     def create_table(self):
         """method docstring"""

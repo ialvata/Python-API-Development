@@ -25,3 +25,12 @@ class ConfigEmptyError(Exception):
 
     def __str__(self) -> str:
         return "This Config has no parameters"
+
+
+class CursorNoneError(Exception):
+    """
+    Class triggered when cursor is not found.
+    """
+
+    def __str__(self) -> str:
+        return "No cursor was found!"
