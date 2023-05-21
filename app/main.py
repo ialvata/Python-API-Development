@@ -29,10 +29,10 @@ for post, idx in zip(myposts, range(len(myposts))):
 
 ##########################    connecting to Postgres db    ##########################
 database = PostgresDB(filename="./db/database.ini", section="postgresql")
-cur = database.connect()
+database.connect()
 
 #####################    creating some initial data in Postgres db    #######################
-cur.execute(
+database.execute(
     """
     CREATE TABLE posts (
         id serial PRIMARY KEY,
@@ -44,7 +44,7 @@ cur.execute(
     """
 )
 for post in myposts:
-    cur.execute(
+    database.execute(
         # pylint: disable = f-string-without-interpolation
         f"""
         INSERT INTO posts (title, content,published)
@@ -74,8 +74,8 @@ def get_all_posts():
     """
     function docstring
     """
-    cur.execute("SELECT * FROM posts")
-    posts = cur.fetchall()
+    database.execute("SELECT * FROM posts")
+    posts = database.get_all()
     return {"data": posts}
 
 
@@ -84,11 +84,17 @@ def create_post(payload: Post):
     """
     function docstring
     """
-    incoming_post = payload.dict()
-    incoming_post["id"] = myposts[len(myposts) - 1]["id"] + 1
-    myposts.append(incoming_post)
-    print(f"Length of myposts: {incoming_post['id']}")
-    return incoming_post
+    database.execute(
+        # pylint: disable = f-string-without-interpolation
+        f"""
+        INSERT INTO posts (title, content,published)
+        VALUES (%s,%s,%s)
+        """,
+        (payload.title, str(payload.content), str(payload.published)),
+    )
+    new_post = database.get_all()
+
+    return {"data": new_post}
 
 
 # path operations are evaluated in order,

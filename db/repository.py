@@ -104,7 +104,8 @@ class PostgresDB:
         if self.cursor is not None and self.conn is not None:
             self.cursor.execute(sql_command, values)
             self.conn.commit()
-        raise ConnectFirstError
+        else:
+            raise ConnectFirstError
 
     def get_all(self):
         """method docstring"""
