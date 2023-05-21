@@ -34,3 +34,12 @@ class CursorNoneError(Exception):
 
     def __str__(self) -> str:
         return "No cursor was found!"
+
+
+class ConnectFirstError(Exception):
+    """
+    Class triggered when connect has been done yet, and we use other methods from db.
+    """
+
+    def __str__(self) -> str:
+        return "Please do db.connect() first!"

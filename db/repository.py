@@ -7,10 +7,9 @@ from configparser import ConfigParser
 from typing import Protocol, runtime_checkable
 
 import psycopg2
-from psycopg2._psycopg import cursor  # pylint: disable = no-name-in-module
 from pydantic import BaseModel
 
-from db.utils import ConfigEmptyError, ConfigFormatError, CursorNoneError
+from db.utils import ConfigEmptyError, ConfigFormatError, ConnectFirstError, CursorNoneError
 
 
 class ConfigDB(BaseModel):
@@ -41,7 +40,7 @@ class DataBase(Protocol):
     def connect(self):
         """method docstring"""
 
-    def create_table(self):
+    def execute(self, sql_command: str, values: tuple[str, ...] | None = None):
         """method docstring"""
 
 
@@ -80,28 +79,42 @@ class PostgresDB:
             self.config = config
         if not hasattr(self, "config"):
             raise ConfigEmptyError
+        self.conn = None
+        self.cursor = None
 
-    def connect(self) -> cursor:
+    def connect(self):
         """Connect to the PostgreSQL database server"""
-        conn = None
         try:
             # connect to the PostgreSQL server
             print("Connecting to the PostgreSQL database...")
-            conn = psycopg2.connect(**self.config.dict())
+            self.conn = psycopg2.connect(**self.config.dict())
             # create a cursor
-            cur = conn.cursor()
-            if cur:
-                return cur
-            raise CursorNoneError
+            print("Setting Cursor...")
+            cursor = self.conn.cursor()
+            if cursor:
+                self.cursor = cursor
+            else:
+                raise CursorNoneError
         except psycopg2.DatabaseError as error:
             print(error)
             raise error
 
-    def create_table(self):
+    def execute(self, sql_command: str, values: tuple[str, ...] | None = None):
         """method docstring"""
+        if self.cursor is not None and self.conn is not None:
+            self.cursor.execute(sql_command, values)
+            self.conn.commit()
+        raise ConnectFirstError
+
+    def get_all(self):
+        """method docstring"""
+        if self.cursor is not None:
+            return self.cursor.fetchall()
+        raise ConnectFirstError
 
 
 if __name__ == "__main__":
     db = PostgresDB(filename="./db/database.ini", section="postgresql")
     print(isinstance(db, DataBase))  # True
     # db = PostgresDB(filename="Asdasd") # raises error
+    db.connect()
