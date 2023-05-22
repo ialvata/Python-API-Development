@@ -8,6 +8,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 
+from db.database import Base, SessionLocal, engine
 from db.repository import PostgresDB
 
 
@@ -32,6 +33,18 @@ database = PostgresDB(filename="./db/database.ini", section="postgresql")
 database.connect()
 
 #####################    creating some initial data in Postgres db    #######################
+Base.metadata.create_all(bind=engine)
+
+
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 database.execute(
     """
     CREATE TABLE posts (
@@ -52,9 +65,6 @@ for post in myposts:
         """,
         (post["title"], post["content"], post["published"]),
     )
-
-    # posts = cur.fetchall() #fetchone
-    # print(posts)
 
 
 ##############################    Creatng FastAPI App   ##########################
