@@ -17,10 +17,11 @@ class ConfigDB(BaseModel):
     class representing the configuration for the db.
     """
 
-    host: str | None = None
+    host: str = "localhost"
     database: str | int | None = None
     user: str | None = None
     password: str | None = None
+    port: str = "5432"
 
 
 @runtime_checkable

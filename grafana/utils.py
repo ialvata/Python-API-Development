@@ -21,22 +21,29 @@ class Grafana(BaseModel):
     api_key: str | None = None
     host: str = "localhost"
     port: str = "3000"
-    grafana_url = f"http://{user}:{password}@{host}:{port}"
     API_DATASOURCES = "/api/datasources"
     API_KEYS = "/api/auth/keys"
+
+    @property
+    def grafana_url(self):
+        """
+        Method DocString
+        """
+        return f"http://{self.user}:{self.password}@{self.host}:{self.port}"
 
     def create_api_key(self):
         """
         Method DocString
         """
         print(f"Creating API KEY with {self.API_KEYS}")
-        self.grafana_url = f"http://{self.user}:{self.password}@{self.host}:{self.port}"
         auth_data = {"Name": grafana_user, "Role": "Admin", "Password": grafana_password}
         response = requests.post(
             f"{self.grafana_url+self.API_KEYS}", json=auth_data, timeout=2
         )
         if response.status_code == 200:
+            print("API Key successfully created.")
             self.api_key = response.json()["key"]
+            print("Writing API Key to file.")
             with open("./grafana/.env.local.grafana_api", mode="w+", encoding="utf-8") as file:
                 file.write(self.api_key)
         elif response.status_code == 409:
@@ -92,3 +99,5 @@ if __name__ == "__main__":
     grafana = Grafana(password=grafana_password, user=grafana_user)
     print(grafana.password, grafana.user)
     grafana.create_api_key()
+    postgres_db = PostgresDB(filename="./db/database.ini", section="postgresql")
+    grafana.add_database_source(postgres_db)
