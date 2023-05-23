@@ -1,34 +1,21 @@
-"""
-Module responsible for pydantic models/schemas
-"""
 # pylint: disable = too-few-public-methods
-from typing import Optional
+"""
+Module responsible for the document/table models to exist in the PostgreSQL DB
+"""
+from sqlalchemy import TIMESTAMP, Boolean, Column, Integer, String
+from sqlalchemy.sql.expression import text
 
-from pydantic import BaseModel
+from db.db_orm import Base
 
 
-class Post(BaseModel):
+class Post(Base):
     """
-    Class docstring
+    Class responsible for the `posts` table in the PostgreSQL DB
     """
 
-    title: str
-    content: str | None = None
-    published: bool = True
-    rating: Optional[int] = None
-
-    class Config:
-        """
-        Behaviour of pydantic can be controlled via the Config class on a model
-        or a pydantic dataclass.
-
-        Pydantic's `orm_mode` will tell the Pydantic model to read the data
-        even if it is not a dict, but an ORM model
-        (or any other arbitrary object with attributes).
-        With this, the Pydantic model is compatible with ORMs, and you can just declare
-        it in the response_model argument in your path operations.
-        You will be able to return a database model and it will read the data from it.
-        https://fastapi.tiangolo.com/tutorial/response-model/?h=
-        """
-
-        orm_mode = True
+    __tablename__ = "posts"
+    id = Column(Integer, primary_key=True, index=True, nullable=False)
+    title = Column(String)
+    content = Column(String)
+    published = Column(Boolean, server_default="TRUE")
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
