@@ -10,7 +10,12 @@ from typing import Protocol, runtime_checkable
 import psycopg2
 from pydantic import BaseModel
 
-from db.utils import ConfigEmptyError, ConfigFormatError, ConnectFirstError, CursorNoneError
+from db.exceptions import (
+    ConfigEmptyError,
+    ConfigFormatError,
+    ConnectFirstError,
+    CursorNoneError,
+)
 
 
 class ConfigDB(BaseModel):
@@ -85,7 +90,15 @@ class PostgresDB:
         self.cursor = None
 
     def connect(self):
-        """Connect to the PostgreSQL database server"""
+        """
+        Connect to the PostgreSQL database server
+
+        ## Example usage:
+        database = PostgresDB(filename="./db/database.ini", section="postgresql")
+        database.connect()
+
+
+        """
         try:
             # connect to the PostgreSQL server
             print("Connecting to the PostgreSQL database...")
@@ -148,3 +161,4 @@ if __name__ == "__main__":
     print(isinstance(db, DataBase))  # True
     # db = PostgresDB(filename="Asdasd") # raises error
     db.connect()
+    db.execute("""DROP TABLE posts;""")
