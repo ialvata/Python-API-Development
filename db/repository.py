@@ -102,7 +102,26 @@ class PostgresDB:
             raise error
 
     def execute(self, sql_command: str, values: tuple[str, ...] | None = None):
-        """method docstring"""
+        """
+        Example Usages:
+        ---------------
+            database.execute(
+                \"""
+                DROP TABLE posts;
+                \"""
+            )
+        database.execute(
+            \"""
+            CREATE TABLE posts (
+                id serial PRIMARY KEY,
+                title varchar NOT NULL,
+                content varchar,
+                published boolean DEFAULT true,
+                created_at TIMESTAMP DEFAULT now()
+            );
+            \"""
+
+        """
         if self.cursor is not None and self.conn is not None:
             self.cursor.execute(sql_command, values)
             self.conn.commit()
