@@ -105,12 +105,12 @@ class PostgresDB:
         """
         Example Usages:
         ---------------
-            database.execute(
-                \"""
-                DROP TABLE posts;
-                \"""
-            )
-        database.execute(
+        `database.execute`(
+            \"""
+            DROP TABLE posts;
+            \"""
+        )
+        `database.execute`(
             \"""
             CREATE TABLE posts (
                 id serial PRIMARY KEY,
@@ -120,6 +120,14 @@ class PostgresDB:
                 created_at TIMESTAMP DEFAULT now()
             );
             \"""
+        )
+        `database.execute`(
+            f\"""
+            INSERT INTO posts (title, content,published)
+            VALUES (%s,%s,%s)
+            \""",
+            (post["title"], post["content"], post["published"]),
+        )
 
         """
         if self.cursor is not None and self.conn is not None:

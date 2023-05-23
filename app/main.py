@@ -17,27 +17,12 @@ for post, idx in zip(myposts, range(len(myposts))):
     post.update({"id": idx})
 
 ##########################    connecting to Postgres db    ##########################
+# Here we're using a low level package called psycopg2
 database = PostgresDB(filename="./db/database.ini", section="postgresql")
 database.connect()
 
 #####################    creating some initial data in Postgres db    #######################
 Base.metadata.create_all(bind=engine)
-
-
-# try:
-
-# )
-# for post in myposts:
-#     database.execute(
-#         # pylint: disable = f-string-without-interpolation
-#         f"""
-#         INSERT INTO posts (title, content,published)
-#         VALUES (%s,%s,%s)
-#         """,
-#         (post["title"], post["content"], post["published"]),
-#     )
-# except DuplicateTable:
-#     print("Table already exists")
 
 
 ##############################    Creatng FastAPI App   ##########################
@@ -59,7 +44,7 @@ def get_all_posts(db_session: Session = Depends(get_database)):
     """
     posts = db_session.query(db.models.Post).all()
     # .execute("SELECT * FROM posts")
-    return {"data": posts}
+    return posts
 
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
