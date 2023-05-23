@@ -23,3 +23,7 @@ This will be my interpretation of the Python API Development 20h course from San
 
 ## Pytest
 - One thing that could be improved was leaving the pytest tests until the end... In my opinion, Sanjeev should have introduced the tests much earlier, and as he created the new methods, or operations, he could have explained a bit how to create useful tests.
+
+## Grafana
+- Allows us to query, visualize, alert on and understand our metrics from different data sources, all through creating our own dashboards. Currently, we're only connected to the PostgreSQL docker container.
+- TODO: Put a Grafana Loki integration up and running.
