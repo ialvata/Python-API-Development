@@ -2,29 +2,14 @@
 Module Docstring
 """
 
-from typing import Optional
-
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, status
-from psycopg2.errors import DuplicateTable  # pylint: disable = no-name-in-module
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 import db.models
 from db.db_orm import Base, engine, get_database
 from db.repository import PostgresDB
-
-
-class Post(BaseModel):
-    """
-    Class docstring
-    """
-
-    title: str
-    content: str | None = None
-    published: bool = True
-    rating: Optional[int] = None
-
+from db.schemas import Post
 
 ##########################    cached posts   ##########################
 myposts = [Post(title=f"title_{idx}", content=f"content_{idx}").dict() for idx in range(1, 11)]
@@ -39,34 +24,20 @@ database.connect()
 Base.metadata.create_all(bind=engine)
 
 
-try:
-    # database.execute(
-    #     """
-    #     DROP TABLE posts;
-    #     """
-    # )
-    database.execute(
-        """
-        CREATE TABLE posts (
-            id serial PRIMARY KEY,
-            title varchar NOT NULL,
-            content varchar,
-            published boolean DEFAULT true,
-            created_at TIMESTAMP DEFAULT now()
-        );
-        """
-    )
-    for post in myposts:
-        database.execute(
-            # pylint: disable = f-string-without-interpolation
-            f"""
-            INSERT INTO posts (title, content,published)
-            VALUES (%s,%s,%s)
-            """,
-            (post["title"], post["content"], post["published"]),
-        )
-except DuplicateTable:
-    print("Table already exists")
+# try:
+
+# )
+# for post in myposts:
+#     database.execute(
+#         # pylint: disable = f-string-without-interpolation
+#         f"""
+#         INSERT INTO posts (title, content,published)
+#         VALUES (%s,%s,%s)
+#         """,
+#         (post["title"], post["content"], post["published"]),
+#     )
+# except DuplicateTable:
+#     print("Table already exists")
 
 
 ##############################    Creatng FastAPI App   ##########################
