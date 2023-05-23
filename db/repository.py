@@ -1,5 +1,6 @@
 """
-This module is responsible for defining everything related to databases.
+This module is responsible for defining everything related to databases, at a lower level than
+the ORM design pattern.
 I would usually separate into different modules the parent class from the subclasses, but in
 this situation the number of code lines is too few to justify it...
 """

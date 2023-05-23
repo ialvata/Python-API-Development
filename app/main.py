@@ -5,10 +5,13 @@ Module Docstring
 from typing import Optional
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status
+from psycopg2.errors import DuplicateTable  # pylint: disable = no-name-in-module
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
-from db.database import Base, SessionLocal, engine
+import db.models
+from db.db_orm import Base, engine, get_database
 from db.repository import PostgresDB
 
 
@@ -36,35 +39,34 @@ database.connect()
 Base.metadata.create_all(bind=engine)
 
 
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-database.execute(
-    """
-    CREATE TABLE posts (
-        id serial PRIMARY KEY,
-        title varchar NOT NULL,
-        content varchar,
-        published boolean DEFAULT true,
-        created_at TIMESTAMP
-    );
-    """
-)
-for post in myposts:
+try:
+    # database.execute(
+    #     """
+    #     DROP TABLE posts;
+    #     """
+    # )
     database.execute(
-        # pylint: disable = f-string-without-interpolation
-        f"""
-        INSERT INTO posts (title, content,published)
-        VALUES (%s,%s,%s)
-        """,
-        (post["title"], post["content"], post["published"]),
+        """
+        CREATE TABLE posts (
+            id serial PRIMARY KEY,
+            title varchar NOT NULL,
+            content varchar,
+            published boolean DEFAULT true,
+            created_at TIMESTAMP DEFAULT now()
+        );
+        """
     )
+    for post in myposts:
+        database.execute(
+            # pylint: disable = f-string-without-interpolation
+            f"""
+            INSERT INTO posts (title, content,published)
+            VALUES (%s,%s,%s)
+            """,
+            (post["title"], post["content"], post["published"]),
+        )
+except DuplicateTable:
+    print("Table already exists")
 
 
 ##############################    Creatng FastAPI App   ##########################
@@ -80,12 +82,12 @@ async def root():
 
 
 @app.get("/posts")
-def get_all_posts():
+def get_all_posts(db_session: Session = Depends(get_database)):
     """
     function docstring
     """
-    database.execute("SELECT * FROM posts")
-    posts = database.get_all()
+    posts = db_session.query(db.models.Post).all()
+    # .execute("SELECT * FROM posts")
     return {"data": posts}
 
 

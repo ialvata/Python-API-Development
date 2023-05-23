@@ -1,3 +1,6 @@
+"""
+Module with all the boilerplate code to start a SQLAlchemy session in the PostgreSQL DB
+"""
 import os
 
 from dotenv import load_dotenv
@@ -21,3 +24,15 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+
+# Dependency
+def get_database():
+    """
+    Function responsible for yielding a session and closing it.
+    """
+    database = SessionLocal()
+    try:
+        yield database
+    finally:
+        database.close()
