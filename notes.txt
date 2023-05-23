@@ -26,3 +26,10 @@ Activating our server app:
 Grafana:
 We need a api key to validate almost any request.
 We'll be able to find them at /org/apikeys
+
+Grafana:
+    http://localhost:3000/
+
+Docker useful commands:
+    docker exec -ti mycontainer /bin/bash
+    docker logs mycontainer
