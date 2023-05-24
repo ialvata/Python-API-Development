@@ -2,75 +2,25 @@
 Module Docstring
 """
 
-from typing import Optional
-
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, status
-from psycopg2.errors import DuplicateTable  # pylint: disable = no-name-in-module
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 import db.models
+import db.schemas
 from db.db_orm import Base, engine, get_database
-from db.repository import PostgresDB
-
-
-class Post(BaseModel):
-    """
-    Class docstring
-    """
-
-    title: str
-    content: str | None = None
-    published: bool = True
-    rating: Optional[int] = None
-
-
-##########################    cached posts   ##########################
-myposts = [Post(title=f"title_{idx}", content=f"content_{idx}").dict() for idx in range(1, 11)]
-for post, idx in zip(myposts, range(len(myposts))):
-    post.update({"id": idx})
-
-##########################    connecting to Postgres db    ##########################
-database = PostgresDB(filename="./db/database.ini", section="postgresql")
-database.connect()
+from db.db_utils import init_db
 
 #####################    creating some initial data in Postgres db    #######################
 Base.metadata.create_all(bind=engine)
-
-
-try:
-    # database.execute(
-    #     """
-    #     DROP TABLE posts;
-    #     """
-    # )
-    database.execute(
-        """
-        CREATE TABLE posts (
-            id serial PRIMARY KEY,
-            title varchar NOT NULL,
-            content varchar,
-            published boolean DEFAULT true,
-            created_at TIMESTAMP DEFAULT now()
-        );
-        """
-    )
-    for post in myposts:
-        database.execute(
-            # pylint: disable = f-string-without-interpolation
-            f"""
-            INSERT INTO posts (title, content,published)
-            VALUES (%s,%s,%s)
-            """,
-            (post["title"], post["content"], post["published"]),
-        )
-except DuplicateTable:
-    print("Table already exists")
-
+get_initial_db = next(get_database())
+if get_initial_db.query(db.schemas.Post).all() == []:
+    init_db(Base, engine, get_initial_db)
 
 ##############################    Creatng FastAPI App   ##########################
 app = FastAPI()
+
+print()
 
 
 @app.get("/")
@@ -86,59 +36,48 @@ def get_all_posts(db_session: Session = Depends(get_database)):
     """
     function docstring
     """
-    posts = db_session.query(db.models.Post).all()
+    posts = db_session.query(db.schemas.Post).all()
     # .execute("SELECT * FROM posts")
-    return {"data": posts}
+    return posts
 
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_post(payload: Post):
+def create_post(payload: db.models.Post, db_session: Session = Depends(get_database)):
     """
     function docstring
     """
-    database.execute(
-        # pylint: disable = f-string-without-interpolation
-        f"""
-        INSERT INTO posts (title, content,published)
-        VALUES (%s,%s,%s)
-        """,
-        (payload.title, str(payload.content), str(payload.published)),
-    )
-    new_post = database.get_all()
-
+    # creating a data according to schema
+    new_post = db.schemas.Post(**(payload.dict()))
+    # adding data to session, moving it to pending state.
+    db_session.add(new_post)
+    # moving all data in pending state, in this session, to persistant state.
+    db_session.commit()
+    # update new_post with data returned from db_session
+    db_session.refresh(new_post)
     return {"data": new_post}
 
 
 # path operations are evaluated in order,
 # you need to make sure that the path for /posts/latest
 # is declared before the one for /posts/{identifier}
-@app.get("/posts/latest")
-def get_latest_post():
-    """
-    function docstring
-    """
-    return {"latest": myposts[len(myposts) - 1]}
-
-
-def find_post(identifier: int) -> dict | None:
-    """
-    function docstring
-    """
-    list_res = [post for post in myposts if post["id"] == identifier]
-    if list_res == []:
-        return None
-    return list_res[0]
+# @app.get("/posts/latest")
+# def get_latest_post(db_session: Session = Depends(get_database)):
+#     """
+#     function docstring
+#     """
+#     return {"latest": myposts[len(myposts) - 1]}
 
 
 # identifier is an example of a path parameter
 # we could also
 @app.get("/posts/{identifier}")
-def get_post(identifier: int):
+def get_post(identifier: int, db_session: Session = Depends(get_database)):
     """
-    function docstring
+    Creates endpoint to fetch specific post
     """
-    post_wanted = find_post(identifier)
-    print(post_wanted)
+    post_wanted = (
+        db_session.query(db.schemas.Post).where(db.schemas.Post.id == identifier).first()
+    )
     if post_wanted is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -150,32 +89,40 @@ def get_post(identifier: int):
 
 # here identifier is a Query parameter
 @app.delete("/posts", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(identifier: int):
+def delete_post(identifier: int, db_session: Session = Depends(get_database)):
     """
-    function docstring
+    Function that creates the resource to delete a specified post, by identifier.
     """
-    post_wanted = find_post(identifier)
+    post_wanted = (
+        db_session.query(db.schemas.Post).where(db.schemas.Post.id == identifier).first()
+    )
     if post_wanted is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {identifier} not found!",
         )
-    myposts.remove(post_wanted)
+    db_session.delete(post_wanted)
+    db_session.commit()
 
 
 @app.patch("/posts/{identifier}", status_code=status.HTTP_200_OK)
-def patch_post(identifier: int, payload: Post):
+def patch_post(
+    identifier: int, payload: db.models.Post, db_session: Session = Depends(get_database)
+):
     """
     function docstring
     """
-    post_wanted = find_post(identifier)
-    if post_wanted is None:
+    post_wanted = db_session.query(db.schemas.Post).where(db.schemas.Post.id == identifier)
+    if post_wanted.first() is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {identifier} not found!",
         )
-    post_wanted.update(payload)
-    return {"fetched_post": post_wanted}
+    # pylance type checker says that payload.dict() is incompatible with type of `values` from
+    # update... hence the extra dict()
+    post_wanted.update(dict(payload.dict()), synchronize_session=False)
+    db_session.commit()
+    return {"fetched_post": post_wanted.first()}
 
 
 if __name__ == "__main__":

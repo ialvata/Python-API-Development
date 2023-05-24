@@ -10,7 +10,12 @@ from typing import Protocol, runtime_checkable
 import psycopg2
 from pydantic import BaseModel
 
-from db.utils import ConfigEmptyError, ConfigFormatError, ConnectFirstError, CursorNoneError
+from db.exceptions import (
+    ConfigEmptyError,
+    ConfigFormatError,
+    ConnectFirstError,
+    CursorNoneError,
+)
 
 
 class ConfigDB(BaseModel):
@@ -85,7 +90,15 @@ class PostgresDB:
         self.cursor = None
 
     def connect(self):
-        """Connect to the PostgreSQL database server"""
+        """
+        Connect to the PostgreSQL database server
+
+        ## Example usage:
+        database = PostgresDB(filename="./db/database.ini", section="postgresql")
+        database.connect()
+
+
+        """
         try:
             # connect to the PostgreSQL server
             print("Connecting to the PostgreSQL database...")
@@ -102,7 +115,34 @@ class PostgresDB:
             raise error
 
     def execute(self, sql_command: str, values: tuple[str, ...] | None = None):
-        """method docstring"""
+        """
+        Example Usages:
+        ---------------
+        `database.execute`(
+            \"""
+            DROP TABLE posts;
+            \"""
+        )
+        `database.execute`(
+            \"""
+            CREATE TABLE posts (
+                id serial PRIMARY KEY,
+                title varchar NOT NULL,
+                content varchar,
+                published boolean DEFAULT true,
+                created_at TIMESTAMP DEFAULT now()
+            );
+            \"""
+        )
+        `database.execute`(
+            f\"""
+            INSERT INTO posts (title, content,published)
+            VALUES (%s,%s,%s)
+            \""",
+            (post["title"], post["content"], post["published"]),
+        )
+
+        """
         if self.cursor is not None and self.conn is not None:
             self.cursor.execute(sql_command, values)
             self.conn.commit()
@@ -121,3 +161,4 @@ if __name__ == "__main__":
     print(isinstance(db, DataBase))  # True
     # db = PostgresDB(filename="Asdasd") # raises error
     db.connect()
+    db.execute("""DROP TABLE posts;""")
