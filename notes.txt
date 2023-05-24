@@ -26,8 +26,7 @@ Activating our server app:
 Grafana:
 We need a api key to validate almost any request.
 We'll be able to find them at /org/apikeys
-
-Grafana:
+The usual url to access Grafana is:
     http://localhost:3000/
 
 Docker useful commands:

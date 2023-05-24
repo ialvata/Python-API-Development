@@ -88,33 +88,41 @@ def get_post(identifier: int, db_session: Session = Depends(get_database)):
 
 
 # here identifier is a Query parameter
-# @app.delete("/posts", status_code=status.HTTP_204_NO_CONTENT)
-# def delete_post(identifier: int):
-#     """
-#     function docstring
-#     """
-#     post_wanted = find_post(identifier)
-#     if post_wanted is None:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail=f"Post with id {identifier} not found!",
-#         )
-#     myposts.remove(post_wanted)
+@app.delete("/posts", status_code=status.HTTP_204_NO_CONTENT)
+def delete_post(identifier: int, db_session: Session = Depends(get_database)):
+    """
+    Function that creates the resource to delete a specified post, by identifier.
+    """
+    post_wanted = (
+        db_session.query(db.schemas.Post).where(db.schemas.Post.id == identifier).first()
+    )
+    if post_wanted is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id {identifier} not found!",
+        )
+    db_session.delete(post_wanted)
+    db_session.commit()
 
 
-# @app.patch("/posts/{identifier}", status_code=status.HTTP_200_OK)
-# def patch_post(identifier: int, payload: db.models.Post):
-#     """
-#     function docstring
-#     """
-#     post_wanted = find_post(identifier)
-#     if post_wanted is None:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail=f"Post with id {identifier} not found!",
-#         )
-#     post_wanted.update(payload)
-#     return {"fetched_post": post_wanted}
+@app.patch("/posts/{identifier}", status_code=status.HTTP_200_OK)
+def patch_post(
+    identifier: int, payload: db.models.Post, db_session: Session = Depends(get_database)
+):
+    """
+    function docstring
+    """
+    post_wanted = db_session.query(db.schemas.Post).where(db.schemas.Post.id == identifier)
+    if post_wanted.first() is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id {identifier} not found!",
+        )
+    # pylance type checker says that payload.dict() is incompatible with type of `values` from
+    # update... hence the extra dict()
+    post_wanted.update(dict(payload.dict()), synchronize_session=False)
+    db_session.commit()
+    return {"fetched_post": post_wanted.first()}
 
 
 if __name__ == "__main__":
