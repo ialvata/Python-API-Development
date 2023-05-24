@@ -10,16 +10,26 @@ import db.models
 import db.schemas
 from db.db_orm import Base, engine, get_database
 from db.db_utils import init_db
+from grafana.grafana_utils import Grafana
+from db.repository import PostgresDB
 
-#####################    creating some initial data in Postgres db    #######################
+#####################    Creating some initial data in Postgres db    #######################
 Base.metadata.create_all(bind=engine)
 get_initial_db = next(get_database())
 if get_initial_db.query(db.schemas.Post).all() == []:
     init_db(Base, engine, get_initial_db)
 
+#####################    Adding a Postgres db datasource to Grafana     #######################
+
+grafana = Grafana()
+grafana.create_api_key()
+postgres_db = PostgresDB(filename="./db/database.ini", section="postgresql")
+grafana.add_database_source(postgres_db)
+
+
 ##############################    Creatng FastAPI App   ##########################
 app = FastAPI()
-
+ 
 print()
 
 

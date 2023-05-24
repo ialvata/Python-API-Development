@@ -6,24 +6,34 @@ import os
 
 import requests
 from dotenv import load_dotenv
-from pydantic import BaseModel
 
 from db.repository import PostgresDB
 
 
-class Grafana(BaseModel):
+class Grafana:
     """
     Class DocString
     """
-
-    user: str = "admin"
-    password: str = "admin"
-    api_key: str | None = None
-    host: str = "localhost"
-    port: str = "3000"
-    API_DATASOURCES = "/api/datasources"
-    API_KEYS = "/api/auth/keys"
-
+    def __init__(
+        self,
+        user: str | None = None,
+        password: str | None = None,
+        api_key: str | None = None,
+        host: str = "localhost",
+        port: str = "3000",
+        API_DATASOURCES:str = "/api/datasources",
+        API_KEYS:str = "/api/auth/keys",
+        env_path:str = "./grafana/.env.local.grafana",
+    ):
+        if user is None or password is None:
+            load_dotenv(dotenv_path = env_path)
+            self.user = os.environ["GF_SECURITY_ADMIN_USER"]
+            self.password = os.environ["GF_SECURITY_ADMIN_PASSWORD"]
+        self.api_key = api_key
+        self.host = host
+        self.port = port
+        self.API_DATASOURCES = API_DATASOURCES
+        self.API_KEYS = API_KEYS
     @property
     def grafana_url(self):
         """
@@ -36,7 +46,7 @@ class Grafana(BaseModel):
         Method DocString
         """
         print(f"Creating API KEY with {self.API_KEYS}")
-        auth_data = {"Name": grafana_user, "Role": "Admin", "Password": grafana_password}
+        auth_data = {"Name": self.user, "Role": "Admin", "Password": self.password}
         response = requests.post(
             f"{self.grafana_url+self.API_KEYS}", json=auth_data, timeout=2
         )
@@ -60,11 +70,12 @@ class Grafana(BaseModel):
         datasource = {
             "name": "PostgreSQL",
             "type": "postgres",
-            "host": f"http://{database.config.host}:5432",
+            "host": f"http://{database.config.host}",
             "database": database.config.database,
             "user": database.config.user,
             "password": database.config.password,
             "access": "proxy",
+            "port" : "6543"
         }
         headers = {
             "Content-Type": "application/json",
@@ -76,6 +87,7 @@ class Grafana(BaseModel):
             headers=headers,
             timeout=2,
         )
+
         if response.status_code == 200:
             print(
                 """
@@ -90,14 +102,18 @@ class Grafana(BaseModel):
             )
         else:
             print(response.content)
+        # database.connect()
+        # database.execute(
+        #     """
+        #     ALTER ROLE python_api_dev set search_path = "posts";
+        #     """
+        # )
+
 
 
 if __name__ == "__main__":
-    load_dotenv(dotenv_path="./grafana/.env.local.grafana")
-    grafana_user = os.environ["GF_SECURITY_ADMIN_USER"]
-    grafana_password = os.environ["GF_SECURITY_ADMIN_PASSWORD"]
-    grafana = Grafana(password=grafana_password, user=grafana_user)
-    print(grafana.password, grafana.user)
+    
+    grafana = Grafana()
     grafana.create_api_key()
     postgres_db = PostgresDB(filename="./db/database.ini", section="postgresql")
     grafana.add_database_source(postgres_db)
