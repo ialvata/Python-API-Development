@@ -57,6 +57,8 @@ class PostgresDB:
     It will try to be hide all the implementation details of the Postgres db.
     """
 
+    type = "postgres"
+
     def __init__(
         self,
         config: ConfigDB | None = None,
@@ -88,6 +90,7 @@ class PostgresDB:
             raise ConfigEmptyError
         self.conn = None
         self.cursor = None
+        self.datasource_settings = []
 
     def connect(self):
         """
