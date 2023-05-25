@@ -2,6 +2,7 @@
 Module DocString
 """
 
+import json
 import os
 
 import requests
@@ -14,6 +15,7 @@ class Grafana:
     """
     Class DocString
     """
+
     def __init__(
         self,
         user: str | None = None,
@@ -21,12 +23,12 @@ class Grafana:
         api_key: str | None = None,
         host: str = "localhost",
         port: str = "3000",
-        API_DATASOURCES:str = "/api/datasources",
-        API_KEYS:str = "/api/auth/keys",
-        env_path:str = "./grafana/.env.local.grafana",
+        API_DATASOURCES: str = "/api/datasources",
+        API_KEYS: str = "/api/auth/keys",
+        env_path: str = "./grafana/.env.local.grafana",
     ):
         if user is None or password is None:
-            load_dotenv(dotenv_path = env_path)
+            load_dotenv(dotenv_path=env_path)
             self.user = os.environ["GF_SECURITY_ADMIN_USER"]
             self.password = os.environ["GF_SECURITY_ADMIN_PASSWORD"]
         self.api_key = api_key
@@ -34,6 +36,7 @@ class Grafana:
         self.port = port
         self.API_DATASOURCES = API_DATASOURCES
         self.API_KEYS = API_KEYS
+
     @property
     def grafana_url(self):
         """
@@ -67,23 +70,44 @@ class Grafana:
         """
         Method DocString
         """
-        datasource = {
-            "name": "PostgreSQL",
-            "type": "postgres",
-            "host": f"http://{database.config.host}",
+
+        jsonData = {
+            "tlsAuth": False,
+            "connMaxLifetime": 14400,
             "database": database.config.database,
-            "user": database.config.user,
+            "maxIdleConns": 100,
+            "maxIdleConnsAuto": True,
+            "maxOpenConns": 100,
+            "sslmode": "disable",
+            "postgresVersion": 1500,
+        }
+        secureJsonData = {
             "password": database.config.password,
+        }
+
+        datasource = {
+            "name": "PostgreSQLPython",
+            "type": "postgres",
+            "url": f"{database.config.host}:{database.config.port}",
+            "user": database.config.user,
+            "database": database.config.database,
+            "basicAuth": False,
             "access": "proxy",
-            "port" : "6543"
+            "withCredentials": False,
+            "isDefault": True,
+            "jsonData": jsonData,
+            "secureJsonData": secureJsonData,
         }
         headers = {
+            "Accept": "application/json",
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}",
         }
+        print(json.dumps(datasource))
+        print()
         response = requests.post(
             self.grafana_url + self.API_DATASOURCES,
-            json=datasource,
+            json=datasource,  # json.dumps(datasource),
             headers=headers,
             timeout=2,
         )
@@ -101,7 +125,7 @@ class Grafana:
                 """
             )
         else:
-            print(response.content)
+            print(response.json())
         # database.connect()
         # database.execute(
         #     """
@@ -110,9 +134,7 @@ class Grafana:
         # )
 
 
-
 if __name__ == "__main__":
-    
     grafana = Grafana()
     grafana.create_api_key()
     postgres_db = PostgresDB(filename="./db/database.ini", section="postgresql")
