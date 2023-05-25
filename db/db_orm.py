@@ -25,7 +25,7 @@ Base = declarative_base()
 
 
 # Dependency
-def get_database():
+def database_gen():
     """
     Function responsible for yielding a session and closing it.
     """

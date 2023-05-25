@@ -144,8 +144,11 @@ class PostgresDB:
 
         """
         if self.cursor is not None and self.conn is not None:
+            print("Executing SQL query")
             self.cursor.execute(sql_command, values)
+            print("Commiting results")
             self.conn.commit()
+            print("Finished committing")
         else:
             raise ConnectFirstError
 
@@ -157,7 +160,7 @@ class PostgresDB:
 
 
 if __name__ == "__main__":
-    db = PostgresDB(filename="./db/database.ini", section="postgresql")
+    db = PostgresDB(filename="./db/database_ignore.ini", section="postgresql")
     print(isinstance(db, DataBase))  # True
     # db = PostgresDB(filename="Asdasd") # raises error
     db.connect()

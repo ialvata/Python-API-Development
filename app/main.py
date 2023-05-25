@@ -8,24 +8,26 @@ from sqlalchemy.orm import Session
 
 import db.models
 import db.schemas
-from db.db_orm import Base, engine, get_database
-from db.db_utils import init_db
+from db.db_orm import Base, database_gen, engine
+from db.db_utils import init_db, stream_mocker
 from db.repository import PostgresDB
 from grafana.grafana_utils import Grafana
 
 #####################    Creating some initial data in Postgres db    #######################
 Base.metadata.create_all(bind=engine)
-get_initial_db = next(get_database())
+get_initial_db = next(database_gen())
 if get_initial_db.query(db.schemas.Post).all() == []:
     init_db(Base, engine, get_initial_db)
 
 #####################    Adding a Postgres db datasource to Grafana     #######################
-
 grafana = Grafana()
 grafana.create_api_key()
 postgres_db = PostgresDB(filename="./db/database.ini", section="postgresql")
 grafana.add_database_source(postgres_db)
 
+
+#####################      Simulating a stream of posts    ##################################
+stream_mocker(Base, engine, get_initial_db)
 
 ##############################    Creatng FastAPI App   ##########################
 app = FastAPI()
@@ -42,7 +44,7 @@ async def root():
 
 
 @app.get("/posts")
-def get_all_posts(db_session: Session = Depends(get_database)):
+def get_all_posts(db_session: Session = Depends(database_gen)):
     """
     function docstring
     """
@@ -52,7 +54,7 @@ def get_all_posts(db_session: Session = Depends(get_database)):
 
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_post(payload: db.models.Post, db_session: Session = Depends(get_database)):
+def create_post(payload: db.models.Post, db_session: Session = Depends(database_gen)):
     """
     function docstring
     """
@@ -71,7 +73,7 @@ def create_post(payload: db.models.Post, db_session: Session = Depends(get_datab
 # you need to make sure that the path for /posts/latest
 # is declared before the one for /posts/{identifier}
 # @app.get("/posts/latest")
-# def get_latest_post(db_session: Session = Depends(get_database)):
+# def get_latest_post(db_session: Session = Depends(database_gen)):
 #     """
 #     function docstring
 #     """
@@ -81,7 +83,7 @@ def create_post(payload: db.models.Post, db_session: Session = Depends(get_datab
 # identifier is an example of a path parameter
 # we could also
 @app.get("/posts/{identifier}")
-def get_post(identifier: int, db_session: Session = Depends(get_database)):
+def get_post(identifier: int, db_session: Session = Depends(database_gen)):
     """
     Creates endpoint to fetch specific post
     """
@@ -99,7 +101,7 @@ def get_post(identifier: int, db_session: Session = Depends(get_database)):
 
 # here identifier is a Query parameter
 @app.delete("/posts", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(identifier: int, db_session: Session = Depends(get_database)):
+def delete_post(identifier: int, db_session: Session = Depends(database_gen)):
     """
     Function that creates the resource to delete a specified post, by identifier.
     """
@@ -117,7 +119,7 @@ def delete_post(identifier: int, db_session: Session = Depends(get_database)):
 
 @app.patch("/posts/{identifier}", status_code=status.HTTP_200_OK)
 def patch_post(
-    identifier: int, payload: db.models.Post, db_session: Session = Depends(get_database)
+    identifier: int, payload: db.models.Post, db_session: Session = Depends(database_gen)
 ):
     """
     function docstring
