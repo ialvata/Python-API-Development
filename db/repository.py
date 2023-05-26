@@ -90,7 +90,7 @@ class PostgresDB:
             raise ConfigEmptyError
         self.conn = None
         self.cursor = None
-        self.datasource_settings = []
+        self.datasource_settings = {}
 
     def connect(self):
         """

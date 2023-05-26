@@ -25,3 +25,14 @@ class NoDataSourceError(Exception):
             No Grafana Datasource was found. The method `add_database_source` can help solve
             this issue.
             """
+
+
+class JsonError(Exception):
+    """
+    Class representing inexistence of json content.
+    """
+
+    def __str__(self) -> str:
+        return """
+            No content corresponding to a json was found
+            """
