@@ -1,0 +1,52 @@
+{
+  "id": null,
+  "title": "Python API Development",
+  "panels": [
+      {
+          "title": "Ratings",
+          "type": "graph",
+          "datasource": "postgresPython",
+          "targets": [
+              {
+                  "expr": "SELECT created_at, rating FROM posts",
+                  "rawQuery": true,
+                  "format": "table",
+                  "rawSql": "SELECT created_at, rating FROM posts ",
+                  "sql": {
+                      "columns": [
+                      {
+                          "type": "function",
+                          "parameters": [
+                          {
+                              "type": "functionParameter",
+                              "name": "created_at"
+                          }
+                          ]
+                      },
+                      {
+                          "type": "function",
+                          "parameters": [
+                          {
+                              "type": "functionParameter",
+                              "name": "rating"
+                          }
+                          ]
+                      }
+                      ]
+                  },
+                  "table": "posts"
+              }
+          ],
+          "xaxis": {
+              "mode": "time"
+          },
+          "gridPos": {
+              "x": 0,
+              "y": 0,
+              "h": 7,
+              "w": 9
+          }
+      }
+  ],
+  "refresh": "5s"
+}

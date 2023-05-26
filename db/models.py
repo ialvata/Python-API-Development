@@ -14,6 +14,7 @@ class Post(BaseModel):
     title: str
     content: str | None = None
     published: bool = True
+    rating: float = 0
 
     class Config:
         """
