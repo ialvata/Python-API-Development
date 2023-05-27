@@ -5,18 +5,22 @@ import os
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import (
+    declarative_base,  # SQLALchemy 2 changed the location of the function
+)
 from sqlalchemy.orm import sessionmaker
 
-load_dotenv(dotenv_path="./db/.env.local.db")
 
-postgres_user = os.environ["POSTGRES_USER"]
-postgres_password = os.environ["POSTGRES_PASSWORD"]
-postgres_database_name = os.environ["POSTGRES_DB"]
+class PostgresCredentials:
+    def __init__(self) -> None:
+        load_dotenv(dotenv_path="./db/.env.local.db")
+        self.postgres_user = os.environ["POSTGRES_USER"]
+        self.postgres_password = os.environ["POSTGRES_PASSWORD"]
+        self.postgres_database_name = os.environ["POSTGRES_DB"]
 
-POSTGRESQL_DATABASE_URL = (
-    f"""postgresql://{postgres_user}:{postgres_password}@localhost/{postgres_database_name}"""
-)
+
+pg_cred = PostgresCredentials()
+POSTGRESQL_DATABASE_URL = f"""postgresql://{pg_cred.postgres_user}:{pg_cred.postgres_password}@localhost/{pg_cred.postgres_database_name}"""
 
 engine = create_engine(POSTGRESQL_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

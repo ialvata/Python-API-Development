@@ -1,7 +1,8 @@
 version: '3.9'
 services:
-  local_postgres:
+  postgres:
     image: postgres:15.3-alpine
+    container_name: postgres
     ports:
       - 5432:5432
     volumes:
@@ -10,8 +11,9 @@ services:
       - ./db/.env.local.db
     # instead, we could have created a `environment` section, with
     # with the env vars in .env.local.db file.
-  local_grafana:
+  grafana:
     image: grafana/grafana-enterprise:9.5.2
+    container_name: grafana
     ports:
       - 3000:3000
     # user: root
@@ -19,6 +21,39 @@ services:
       - grafana_data:/usr/share/grafana/data
     env_file:
       - ./grafana/.env.local.grafana
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+    - 9090:9090
+    command:
+    - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+    # The short syntax uses a single string with colon-separated values to specify a
+    # volume mount (VOLUME:CONTAINER_PATH),
+    # or an access mode (VOLUME:CONTAINER_PATH:ACCESS_MODE).
+    # VOLUME: MAY be either a host path on the platform hosting containers (bind mount) or
+    # a volume name.
+    # CONTAINER_PATH: the path in the container where the volume is mounted.
+    - prometheus_data:/usr/share/prometheus/data # volume name:container path
+    - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro # host path: container path
+    depends_on:
+    - cadvisor
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+    - 8080:8080
+    volumes:
+    - cadvisor_data:/usr/share/cadvisor/data
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+    - postgres
 volumes:
   postgres_data:
   grafana_data:
+  cadvisor_data:
+  prometheus_data:
