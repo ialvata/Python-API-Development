@@ -26,4 +26,5 @@ This will be my interpretation of the Python API Development 20h course from San
 
 ## Grafana
 - Allows us to query, visualize, alert on and understand our metrics from different data sources, all through creating our own dashboards. Currently, we're only connected to the PostgreSQL docker container.
+- Prometheus and cAdvisor for containers metrics capture have been added. TODO: Create an integration with Grafana.
 - TODO: Put a Grafana Loki integration up and running.
