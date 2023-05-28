@@ -6,8 +6,7 @@ import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
 
-import db.models
-import db.schemas
+from db import models, schemas
 from db.db_orm import Base, database_gen, engine
 from db.db_utils import init_db, stream_mocker
 from db.repository import PostgresDB
@@ -16,7 +15,7 @@ from grafana.grafana_utils import Grafana
 #####################    Creating some initial data in Postgres db    #######################
 Base.metadata.create_all(bind=engine)
 get_initial_db = next(database_gen())
-if get_initial_db.query(db.schemas.Post).all() == []:
+if get_initial_db.query(schemas.Post).all() == []:
     init_db(Base, engine, get_initial_db)
 
 #####################    Adding a Postgres db datasource to Grafana     #######################
@@ -27,7 +26,7 @@ grafana.add_database_source(postgres_db)
 
 
 #####################      Simulating a stream of posts    ##################################
-stream_mocker(Base, engine, get_initial_db)
+stream_mocker(get_initial_db)
 
 ##############################    Creatng FastAPI App   ##########################
 app = FastAPI()
@@ -43,60 +42,59 @@ async def root():
     return {"message": "Hello World 2"}
 
 
-@app.get("/posts")
+@app.get("/posts", response_model=list[models.PostResponse])
 def get_all_posts(db_session: Session = Depends(database_gen)):
     """
     function docstring
     """
-    posts = db_session.query(db.schemas.Post).all()
+    posts = db_session.query(schemas.Post).all()
     # .execute("SELECT * FROM posts")
     return posts
 
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_post(payload: db.models.Post, db_session: Session = Depends(database_gen)):
+@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=models.PostResponse)
+def create_post(payload: models.PostCreate, db_session: Session = Depends(database_gen)):
     """
     function docstring
     """
     # creating a data according to schema
-    new_post = db.schemas.Post(**(payload.dict()))
+    new_post = schemas.Post(**(payload.dict()))
     # adding data to session, moving it to pending state.
     db_session.add(new_post)
     # moving all data in pending state, in this session, to persistant state.
     db_session.commit()
     # update new_post with data returned from db_session
     db_session.refresh(new_post)
-    return {"data": new_post}
+    return new_post
 
 
 # path operations are evaluated in order,
 # you need to make sure that the path for /posts/latest
 # is declared before the one for /posts/{identifier}
-# @app.get("/posts/latest")
-# def get_latest_post(db_session: Session = Depends(database_gen)):
-#     """
-#     function docstring
-#     """
-#     return {"latest": myposts[len(myposts) - 1]}
+@app.get("/posts/latest", response_model=models.PostResponse)
+def get_latest_post(db_session: Session = Depends(database_gen)):
+    """
+    function docstring
+    """
+    length_db = db_session.query(schemas.Post).count()
+    post_wanted = db_session.query(schemas.Post).where(schemas.Post.id == length_db).first()
+    return post_wanted
 
 
 # identifier is an example of a path parameter
-# we could also
-@app.get("/posts/{identifier}")
+@app.get("/posts/{identifier}", response_model=models.PostResponse)
 def get_post(identifier: int, db_session: Session = Depends(database_gen)):
     """
     Creates endpoint to fetch specific post
     """
-    post_wanted = (
-        db_session.query(db.schemas.Post).where(db.schemas.Post.id == identifier).first()
-    )
+    post_wanted = db_session.query(schemas.Post).where(schemas.Post.id == identifier).first()
     if post_wanted is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {identifier} not found!",
         )
     # response.status_code = status.HTTP_404_NOT_FOUND
-    return {"fetched_post": post_wanted}
+    return post_wanted
 
 
 # here identifier is a Query parameter
@@ -105,9 +103,7 @@ def delete_post(identifier: int, db_session: Session = Depends(database_gen)):
     """
     Function that creates the resource to delete a specified post, by identifier.
     """
-    post_wanted = (
-        db_session.query(db.schemas.Post).where(db.schemas.Post.id == identifier).first()
-    )
+    post_wanted = db_session.query(schemas.Post).where(schemas.Post.id == identifier).first()
     if post_wanted is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -117,14 +113,16 @@ def delete_post(identifier: int, db_session: Session = Depends(database_gen)):
     db_session.commit()
 
 
-@app.patch("/posts/{identifier}", status_code=status.HTTP_200_OK)
+@app.patch(
+    "/posts/{identifier}", status_code=status.HTTP_200_OK, response_model=models.PostResponse
+)
 def patch_post(
-    identifier: int, payload: db.models.Post, db_session: Session = Depends(database_gen)
+    identifier: int, payload: models.PostUpdate, db_session: Session = Depends(database_gen)
 ):
     """
     function docstring
     """
-    post_wanted = db_session.query(db.schemas.Post).where(db.schemas.Post.id == identifier)
+    post_wanted = db_session.query(schemas.Post).where(schemas.Post.id == identifier)
     if post_wanted.first() is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -134,7 +132,33 @@ def patch_post(
     # update... hence the extra dict()
     post_wanted.update(dict(payload.dict()), synchronize_session=False)
     db_session.commit()
-    return {"fetched_post": post_wanted.first()}
+    return post_wanted.first()
+
+
+#################################        User Endpoints        ################################
+@app.get("/users", response_model=list[models.UserResponse])
+def get_all_users(db_session: Session = Depends(database_gen)):
+    """
+    function docstring
+    """
+    users = db_session.query(schemas.User).all()
+    return users
+
+
+@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=models.UserResponse)
+def create_user(payload: models.UserCreate, db_session: Session = Depends(database_gen)):
+    """
+    function docstring
+    """
+    # creating a data according to schema
+    new_user = schemas.User(**(payload.dict()))
+    # adding data to session, moving it to pending state.
+    db_session.add(new_user)
+    # moving all data in pending state, in this session, to persistant state.
+    db_session.commit()
+    # update new_post with data returned from db_session
+    db_session.refresh(new_user)
+    return new_user
 
 
 if __name__ == "__main__":

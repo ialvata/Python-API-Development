@@ -47,6 +47,9 @@ class Grafana:
 
     @property
     def headers(self):
+        """
+        Method DocString
+        """
         if self.api_key is None:
             raise GrafanaAPIError
 
@@ -115,8 +118,6 @@ class Grafana:
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}",
         }
-        print(json.dumps(datasource))
-        print()
         response = requests.post(
             self.grafana_url + self.API_DATASOURCES,
             json=datasource,  # json.dumps(datasource),
@@ -203,8 +204,8 @@ class Grafana:
 
 
 if __name__ == "__main__":
-    from db.db_orm import Base, database_gen, engine
-    from db.db_utils import stream_mocker
+    # from db.db_orm import Base, database_gen, engine
+    # from db.db_utils import stream_mocker
 
     grafana = Grafana()
     grafana.create_api_key()
