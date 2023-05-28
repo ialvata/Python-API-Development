@@ -17,6 +17,9 @@ psycopg2 = "^2.9.6"
 psycopg2-binary = "^2.9.6"
 requests = "^2.30.0"
 flake8 = "^6.0.0"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+urllib3 = "1.26.16"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 
 
 [build-system]
