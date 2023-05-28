@@ -49,7 +49,6 @@ class PostResponse(PostBase):
         """
         Behaviour of pydantic can be controlled via the Config class on a model
         or a pydantic dataclass.
-
         Pydantic's `orm_mode` will tell the Pydantic model to read the data
         even if it is not a dict, but an ORM model
         (or any other arbitrary object with attributes).
