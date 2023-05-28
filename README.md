@@ -18,7 +18,7 @@ This will be my interpretation of the Python API Development 20h course from San
 
 ## Pre-Commit Hooks
 - Black:Python code formatter. Character line length optimised for my screen.
-- Pylint: Pylint analyses your code without actually running it. It checks for errors, enforces a coding standard, looks for code smells, and can make suggestions about how the code could be refactored.
+- Flake8: Analyses your code without actually running it. It checks for errors, enforces a coding standard, looks for code smells, and can make suggestions about how the code could be refactored. Initially, this repo used pylint, but when using an ORM like SQLAlchemy, pylint is too slow.
 - isort: Python utility / library to sort imports alphabetically, and automatically separated into sections and by type.
 
 ## Pytest
