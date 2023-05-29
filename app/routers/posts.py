@@ -1,0 +1,104 @@
+"""
+Module responsible for Posts related operations
+"""
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from db import models, schemas
+from db.db_orm import database_gen
+
+#################################        Router        ################################
+router = APIRouter(prefix="/posts")
+
+
+@router.get("/", response_model=list[models.PostResponse])
+def get_all_posts(db_session: Session = Depends(database_gen)):
+    """
+    function docstring
+    """
+    posts = db_session.query(schemas.Post).all()
+    # .execute("SELECT * FROM posts")
+    return posts
+
+
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=models.PostResponse)
+def create_post(payload: models.PostCreate, db_session: Session = Depends(database_gen)):
+    """
+    function docstring
+    """
+    # creating a data according to schema
+    new_post = schemas.Post(**(payload.dict()))
+    # adding data to session, moving it to pending state.
+    db_session.add(new_post)
+    # moving all data in pending state, in this session, to persistant state.
+    db_session.commit()
+    # update new_post with data returned from db_session
+    db_session.refresh(new_post)
+    return new_post
+
+
+# path operations are evaluated in order,
+# you need to make sure that the path for /posts/latest
+# is declared before the one for /posts/{identifier}
+@router.get("/latest", response_model=models.PostResponse)
+def get_latest_post(db_session: Session = Depends(database_gen)):
+    """
+    function docstring
+    """
+    length_db = db_session.query(schemas.Post).count()
+    post_wanted = db_session.query(schemas.Post).where(schemas.Post.id == length_db).first()
+    return post_wanted
+
+
+# identifier is an example of a path parameter
+@router.get("/{identifier}", response_model=models.PostResponse)
+def get_post(identifier: int, db_session: Session = Depends(database_gen)):
+    """
+    Creates endpoint to fetch specific post
+    """
+    post_wanted = db_session.query(schemas.Post).where(schemas.Post.id == identifier).first()
+    if post_wanted is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id {identifier} not found!",
+        )
+    # response.status_code = status.HTTP_404_NOT_FOUND
+    return post_wanted
+
+
+# here identifier is a Query parameter
+@router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
+def delete_post(identifier: int, db_session: Session = Depends(database_gen)):
+    """
+    Function that creates the resource to delete a specified post, by identifier.
+    """
+    post_wanted = db_session.query(schemas.Post).where(schemas.Post.id == identifier).first()
+    if post_wanted is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id {identifier} not found!",
+        )
+    db_session.delete(post_wanted)
+    db_session.commit()
+
+
+@router.patch(
+    "/{identifier}", status_code=status.HTTP_200_OK, response_model=models.PostResponse
+)
+def patch_post(
+    identifier: int, payload: models.PostUpdate, db_session: Session = Depends(database_gen)
+):
+    """
+    function docstring
+    """
+    post_wanted = db_session.query(schemas.Post).where(schemas.Post.id == identifier)
+    if post_wanted.first() is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id {identifier} not found!",
+        )
+    # pylance type checker says that payload.dict() is incompatible with type of `values` from
+    # update... hence the extra dict()
+    post_wanted.update(dict(payload.dict()), synchronize_session=False)
+    db_session.commit()
+    return post_wanted.first()
