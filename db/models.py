@@ -16,7 +16,7 @@ class PostBase(BaseModel):
     title: str
     content: str
     published: bool = True
-    rating: float = 0
+    rating: float
 
 
 class PostCreate(PostBase):
@@ -84,6 +84,22 @@ class UserResponse(BaseModel):
     id: int
     email: EmailStr
     created_at: datetime
+
+    class Config:
+        """
+        Class responsible for compatibility between SQLAlchemy schemas and Pydantic models.
+        """
+
+        orm_mode = True
+
+
+class UserLogin(BaseModel):
+    """
+    Class responsible for the `posts` table in the PostgreSQL DB
+    """
+
+    email: EmailStr
+    password: str
 
     class Config:
         """

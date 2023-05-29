@@ -8,7 +8,7 @@ from db import models, schemas
 from db.db_orm import database_gen
 
 #################################        Router        ################################
-router = APIRouter(prefix="/posts")
+router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
 @router.get("/", response_model=list[models.PostResponse])

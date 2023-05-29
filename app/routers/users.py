@@ -11,7 +11,7 @@ from db import models, schemas
 from db.db_orm import database_gen
 
 #################################        Router        ################################
-router = APIRouter(prefix="/users")
+router = APIRouter(prefix="/users", tags=["Users"])
 
 
 #################################        User Endpoints        ################################

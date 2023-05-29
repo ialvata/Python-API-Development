@@ -5,7 +5,7 @@ Module Docstring
 import uvicorn
 from fastapi import FastAPI
 
-from app.routers import posts, users
+from app.routers import authentication, posts, users
 from db import schemas
 from db.db_orm import Base, database_gen, engine
 from db.db_utils import init_db  # , stream_mocker
@@ -13,6 +13,8 @@ from db.repository import PostgresDB
 from grafana.grafana_utils import Grafana
 
 #####################    Creating some initial data in Postgres db    #######################
+print(f"Creating tables in {Base}")
+# Base.metadate.create_all should be always in the main.py, from where we run the app.
 Base.metadata.create_all(bind=engine)
 get_initial_db = next(database_gen())
 if get_initial_db.query(schemas.Post).all() == []:
@@ -33,6 +35,7 @@ app = FastAPI()
 
 app.include_router(posts.router)
 app.include_router(users.router)
+app.include_router(authentication.router)
 
 
 @app.get("/")
