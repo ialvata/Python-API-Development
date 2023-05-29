@@ -1,7 +1,0 @@
-; We need this to avoid
-
-[MASTER]
-; main.py:2:0: E0611: No name 'BaseModel' in module 'pydantic' (no-name-in-module)
-extension-pkg-whitelist=pydantic
-; tests/fastapi_app/test_crud.py:6:0: E0401: Unable to import 'app.main' (import-error)
-init-hook="from pylint.config import find_pylintrc; import os, sys; sys.path.append(os.path.dirname(find_pylintrc()))"
