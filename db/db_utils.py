@@ -8,10 +8,10 @@ from pydantic import EmailStr
 from sqlalchemy import Engine
 
 from app.utils import hash
-from db.models import PostCreate as Post_pydantic
-from db.models import UserCreate as User_pydantic
 from db.schemas import Post as Post_sql
 from db.schemas import User as User_sql
+from pydantic_models.posts import PostCreate as Post_pydantic
+from pydantic_models.users import UserCreate as User_pydantic
 
 
 def init_db(base, engine: Engine, db_session):

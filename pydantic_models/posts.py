@@ -5,7 +5,7 @@ Module responsible for pydantic models/schemas
 
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 class PostBase(BaseModel):
@@ -56,54 +56,6 @@ class PostResponse(PostBase):
         it in the response_model argument in your path operations.
         You will be able to return a database model and it will read the data from it.
         https://fastapi.tiangolo.com/tutorial/response-model/?h=
-        """
-
-        orm_mode = True
-
-
-class UserBase(BaseModel):
-    """
-    Class responsible for the `posts` table in the PostgreSQL DB
-    """
-
-    email: EmailStr
-    password: str
-
-
-class UserCreate(UserBase):
-    """
-    Class responsible for the `posts` table in the PostgreSQL DB
-    """
-
-
-class UserResponse(BaseModel):
-    """
-    Class responsible for the `posts` table in the PostgreSQL DB
-    """
-
-    id: int
-    email: EmailStr
-    created_at: datetime
-
-    class Config:
-        """
-        Class responsible for compatibility between SQLAlchemy schemas and Pydantic models.
-        """
-
-        orm_mode = True
-
-
-class UserLogin(BaseModel):
-    """
-    Class responsible for the `posts` table in the PostgreSQL DB
-    """
-
-    email: EmailStr
-    password: str
-
-    class Config:
-        """
-        Class responsible for compatibility between SQLAlchemy schemas and Pydantic models.
         """
 
         orm_mode = True

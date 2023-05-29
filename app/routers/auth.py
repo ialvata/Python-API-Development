@@ -5,15 +5,17 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.utils import verify
-from db import models, schemas
+from authetication.oauth2 import create_access_token
+from db import schemas
 from db.db_orm import database_gen
+from pydantic_models import users
 
 #################################        Router        ################################
 router = APIRouter(tags=["Authentication"])
 
 
 @router.post("/login", status_code=status.HTTP_202_ACCEPTED)
-def login(payload: models.UserLogin, db_session: Session = Depends(database_gen)):
+def login(payload: users.UserLogin, db_session: Session = Depends(database_gen)):
     """
     function docstring
     """
@@ -31,5 +33,6 @@ def login(payload: models.UserLogin, db_session: Session = Depends(database_gen)
             detail="Invalid credentials!",
         )
     # create a token
+    access_token = create_access_token(data={"email": payload.email})
     # return token
-    return {"token": "example_token"}
+    return {"token": access_token, "token_type": "Bearer"}
