@@ -25,6 +25,8 @@ This will be my interpretation of the Python API Development 20h course from San
 - One thing that could be improved was leaving the pytest tests until the end... In my opinion, Sanjeev should have introduced the tests much earlier, and as he created the new methods, or operations, he could have explained a bit how to create useful tests.
 
 ## Grafana
-- Allows us to query, visualize, alert on and understand our metrics from different data sources, all through creating our own dashboards. Currently, we're only connected to the PostgreSQL docker container.
-- Prometheus and cAdvisor for containers metrics capture have been added. TODO: Create an integration with Grafana.
+- Allows us to query, visualize, alert on and understand our metrics from different data sources, all through creating our own dashboards.
+- PostgreSQL, and Prometheus as grafana's datasources have been added. The dashboard in the picture was imported manually.
+![image](https://github.com/ialvata/Python-API-Development/assets/110241614/74f8cbbe-78c3-4389-abe7-9b8841dc077d)
+
 - TODO: Put a Grafana Loki integration up and running.
