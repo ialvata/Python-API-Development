@@ -30,7 +30,7 @@ class UserCreate(UserBase):
 
 class UserResponse(UserBase):
     """
-    Class responsible for the `posts` table in the PostgreSQL DB
+    Class used to make sure FastAPI resources ouputs are type checked.
     """
 
     id: int
@@ -47,7 +47,7 @@ class UserResponse(UserBase):
 
 class UserLogin(UserBase):
     """
-    Class responsible for the `posts` table in the PostgreSQL DB
+    Class responsible for login in authentication router input type checking.
     """
 
     password: str

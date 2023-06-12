@@ -4,6 +4,7 @@ Module responsible for Posts related operations
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from authetication.oauth2 import TokenData, get_current_user
 from db import schemas
 from db.db_orm import database_gen
 from pydantic_models import posts
@@ -23,7 +24,11 @@ def get_all_posts(db_session: Session = Depends(database_gen)):
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=posts.PostResponse)
-def create_post(payload: posts.PostCreate, db_session: Session = Depends(database_gen)):
+def create_post(
+    payload: posts.PostCreate,
+    db_session: Session = Depends(database_gen),
+    token_data: TokenData = Depends(get_current_user),
+):
     """
     function docstring
     """
@@ -69,7 +74,11 @@ def get_post(identifier: int, db_session: Session = Depends(database_gen)):
 
 # here identifier is a Query parameter
 @router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(identifier: int, db_session: Session = Depends(database_gen)):
+def delete_post(
+    identifier: int,
+    db_session: Session = Depends(database_gen),
+    token_data: TokenData = Depends(get_current_user),
+):
     """
     Function that creates the resource to delete a specified post, by identifier.
     """
@@ -87,7 +96,10 @@ def delete_post(identifier: int, db_session: Session = Depends(database_gen)):
     "/{identifier}", status_code=status.HTTP_200_OK, response_model=posts.PostResponse
 )
 def patch_post(
-    identifier: int, payload: posts.PostUpdate, db_session: Session = Depends(database_gen)
+    identifier: int,
+    payload: posts.PostUpdate,
+    db_session: Session = Depends(database_gen),
+    token_data: TokenData = Depends(get_current_user),
 ):
     """
     function docstring

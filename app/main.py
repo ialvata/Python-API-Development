@@ -25,6 +25,7 @@ grafana = Grafana()
 grafana.create_api_key()
 postgres_db = PostgresDB(filename="./db/database.ini", section="postgresql")
 grafana.add_database_source(postgres_db)
+grafana.upload_to_grafana(postgres_db)
 
 
 #####################      Simulating a stream of posts    ##################################
