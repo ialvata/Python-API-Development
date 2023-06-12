@@ -26,7 +26,11 @@ This will be my interpretation of the Python API Development 20h course from San
 
 ## Grafana
 - Allows us to query, visualize, alert on and understand our metrics from different data sources, all through creating our own dashboards.
-- PostgreSQL, and Prometheus as grafana's datasources have been added. The dashboard in the picture was imported manually.
+- PostgreSQL, and Prometheus as grafana's datasources have been added. 
+The dashboard from PostgreSQL was created in an automated way.
+![image](https://github.com/ialvata/Python-API-Development/assets/110241614/5a6bfa25-6d79-4344-978d-beec2c9cef7f)
+
+The dashboard from Prometheus metrics, in the picture below, was imported manually.
 ![image](https://github.com/ialvata/Python-API-Development/assets/110241614/74f8cbbe-78c3-4389-abe7-9b8841dc077d)
 
 - TODO: Put a Grafana Loki integration up and running.
