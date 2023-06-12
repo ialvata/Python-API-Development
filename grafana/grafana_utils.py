@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 from db.repository import PostgresDB
 from grafana.exceptions import GrafanaAPIError, JsonError, NoDataSourceError
+from prometheus.prometheus_utils import PrometheusDB
 
 
 class Grafana:
@@ -137,6 +138,52 @@ class Grafana:
             print(
                 """
                 Data Source Creation of PostgreSQL already exists
+                """
+            )
+        else:
+            print(response.json())
+
+    def add_prometheus_source(self, database: PrometheusDB):
+        """
+        Method DocString
+        """
+
+        jsonData = {"httpMethod": "POST"}
+        datasource = {
+            "name": f"{database.type}Python",
+            "type": database.type,  # "prometheus",
+            "url": f"http://{database.config.host}:{database.config.port}",
+            # grafana bug needs http://
+            "basicAuth": False,
+            "access": "proxy",
+            "withCredentials": False,
+            "isDefault": False,
+            "jsonData": jsonData,
+        }
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}",
+        }
+        response = requests.post(
+            self.grafana_url + self.API_DATASOURCES,
+            json=datasource,  # json.dumps(datasource),
+            headers=headers,
+            timeout=2,
+        )
+
+        if response.status_code == 200:
+            print(
+                f"""
+                Datasource creation for {database.type}Python was successfull!
+                """
+            )
+            response_content = response.json()
+            database.datasource_settings = response_content["datasource"]
+        elif response.status_code == 409:  # this key has already been created
+            print(
+                f"""
+                Data Source for {database.type}Python already exists
                 """
             )
         else:
