@@ -4,14 +4,16 @@ Module responsible for Posts related operations
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from db import models, schemas
+from authetication.oauth2 import TokenData, get_current_user
+from db import schemas
 from db.db_orm import database_gen
+from pydantic_models import posts
 
 #################################        Router        ################################
-router = APIRouter(prefix="/posts")
+router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
-@router.get("/", response_model=list[models.PostResponse])
+@router.get("/", response_model=list[posts.PostResponse])
 def get_all_posts(db_session: Session = Depends(database_gen)):
     """
     function docstring
@@ -21,8 +23,12 @@ def get_all_posts(db_session: Session = Depends(database_gen)):
     return posts
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=models.PostResponse)
-def create_post(payload: models.PostCreate, db_session: Session = Depends(database_gen)):
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=posts.PostResponse)
+def create_post(
+    payload: posts.PostCreate,
+    db_session: Session = Depends(database_gen),
+    token_data: TokenData = Depends(get_current_user),
+):
     """
     function docstring
     """
@@ -40,7 +46,7 @@ def create_post(payload: models.PostCreate, db_session: Session = Depends(databa
 # path operations are evaluated in order,
 # you need to make sure that the path for /posts/latest
 # is declared before the one for /posts/{identifier}
-@router.get("/latest", response_model=models.PostResponse)
+@router.get("/latest", response_model=posts.PostResponse)
 def get_latest_post(db_session: Session = Depends(database_gen)):
     """
     function docstring
@@ -51,7 +57,7 @@ def get_latest_post(db_session: Session = Depends(database_gen)):
 
 
 # identifier is an example of a path parameter
-@router.get("/{identifier}", response_model=models.PostResponse)
+@router.get("/{identifier}", response_model=posts.PostResponse)
 def get_post(identifier: int, db_session: Session = Depends(database_gen)):
     """
     Creates endpoint to fetch specific post
@@ -68,7 +74,11 @@ def get_post(identifier: int, db_session: Session = Depends(database_gen)):
 
 # here identifier is a Query parameter
 @router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(identifier: int, db_session: Session = Depends(database_gen)):
+def delete_post(
+    identifier: int,
+    db_session: Session = Depends(database_gen),
+    token_data: TokenData = Depends(get_current_user),
+):
     """
     Function that creates the resource to delete a specified post, by identifier.
     """
@@ -83,10 +93,13 @@ def delete_post(identifier: int, db_session: Session = Depends(database_gen)):
 
 
 @router.patch(
-    "/{identifier}", status_code=status.HTTP_200_OK, response_model=models.PostResponse
+    "/{identifier}", status_code=status.HTTP_200_OK, response_model=posts.PostResponse
 )
 def patch_post(
-    identifier: int, payload: models.PostUpdate, db_session: Session = Depends(database_gen)
+    identifier: int,
+    payload: posts.PostUpdate,
+    db_session: Session = Depends(database_gen),
+    token_data: TokenData = Depends(get_current_user),
 ):
     """
     function docstring

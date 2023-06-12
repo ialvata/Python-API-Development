@@ -22,6 +22,8 @@ To install psycopg2, we first install:
 
 Activating our server app:
     uvicorn app.main:app --reload
+Accessing our server app:
+    http://localhost:8000/
 
 Grafana:
 We need a api key to validate almost any request.

@@ -7,15 +7,16 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.utils import hash
-from db import models, schemas
+from db import schemas
 from db.db_orm import database_gen
+from pydantic_models import users
 
 #################################        Router        ################################
-router = APIRouter(prefix="/users")
+router = APIRouter(prefix="/users", tags=["Users"])
 
 
 #################################        User Endpoints        ################################
-@router.get("/", response_model=models.UserResponse | list[models.UserResponse])
+@router.get("/", response_model=users.UserResponse | list[users.UserResponse])
 def get_user(email: str | None = None, db_session: Session = Depends(database_gen)):
     """
     Creates endpoint to fetch specific user information, or all users if email is None
@@ -33,8 +34,8 @@ def get_user(email: str | None = None, db_session: Session = Depends(database_ge
     return user_wanted
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=models.UserResponse)
-def create_user(payload: models.UserCreate, db_session: Session = Depends(database_gen)):
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=users.UserResponse)
+def create_user(payload: users.UserCreate, db_session: Session = Depends(database_gen)):
     """
     function docstring
     """
