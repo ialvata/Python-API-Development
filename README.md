@@ -23,12 +23,12 @@ This will be my interpretation of the Python API Development 20h course from San
 
 ## Pytest
 One thing that could be improved was leaving the pytest tests until the end... In my opinion, Sanjeev should have introduced the tests much earlier, and as he created the new methods, or operations, he could have explained a bit how to create useful tests.
-TODO:
+#### TODO:
 - Add Tests, and coverage report.
 
 ## FastAPI
 Sanjeev does not use async functions, but this is encouraged in FastAPI documentation.
-TODO:
+#### TODO:
 - Convert endpoints to use async functions.
 
 ## Grafana
@@ -41,10 +41,11 @@ The dashboard from PostgreSQL was created in an automated way.
 The dashboard from Prometheus metrics, in the picture below, was imported manually.
 ![image](https://github.com/ialvata/Python-API-Development/assets/110241614/74f8cbbe-78c3-4389-abe7-9b8841dc077d)
 
-TODO: 
+#### TODO: 
 - Put a Grafana Loki integration up and running.
 - Improve Prometheus dashboards.
 
 ## Prometheus
 Prometheus collects and stores its metrics as time series data, i.e. metrics information is stored with the timestamp at which it was recorded, alongside optional key-value pairs called labels.
-- TODO: Add a PostgreSQL exporter to Prometheus docker image.
+#### TODO: 
+- Add a PostgreSQL exporter to Prometheus docker image.
