@@ -34,3 +34,5 @@ The usual url to access Grafana is:
 Docker useful commands:
     docker exec -ti mycontainer /bin/bash
     docker logs mycontainer
+
+This project has Linear(linear.app) integration, using my personal profile.
