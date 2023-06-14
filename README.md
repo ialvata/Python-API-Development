@@ -1,4 +1,4 @@
-# Python-API-Development
+# Python-API-Development ([YouTube video](https://www.youtube.com/watch?v=0sOvCWFmrtA&ab_channel=freeCodeCamp.org))
 
 [![alt text][image]][hyperlink]
 
@@ -12,7 +12,7 @@ https://github.com/ialvata/Python-API-Development/assets/110241614/6ee51d95-4301
 
 This will be my interpretation of the Python API Development 20h course from Sanjeev Thiyagarajan on Youtube. :) 
 
-[Link to YouTube](https://www.youtube.com/watch?v=0sOvCWFmrtA&ab_channel=freeCodeCamp.org)
+
 
 ## Linear 
 This project is (now) being planned and tracked, using Linear.app. See an example of this integration [here](https://github.com/ialvata/Python-API-Development/pull/11).
