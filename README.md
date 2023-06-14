@@ -14,7 +14,8 @@ This will be my interpretation of the Python API Development 20h course from San
 
 [Link to YouTube](https://www.youtube.com/watch?v=0sOvCWFmrtA&ab_channel=freeCodeCamp.org)
 
-
+## Linear 
+This project is (now) being planned and tracked, using Linear.app. See an example of this integration [here](https://github.com/ialvata/Python-API-Development/pull/11).
 
 ## Pre-Commit Hooks
 - Black:Python code formatter. Character line length optimised for my screen.
