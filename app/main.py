@@ -2,24 +2,26 @@
 Module Docstring
 """
 
+import asyncio
+
 import uvicorn
 from fastapi import FastAPI
 
 from app.routers import auth, posts, users
 from db import schemas
-from db.db_orm import Base, database_gen, engine
+from db.db_orm import database_gen, engine
 from db.db_utils import init_db, stream_mocker
 from db.repository import PostgresDB
 from grafana.grafana_utils import Grafana
 from prometheus.prometheus_utils import PrometheusDB
 
 #####################    Creating some initial data in Postgres db    #######################
-print(f"Creating tables in {Base}")
+print(f"Creating tables in {schemas.Base}")
 # Base.metadate.create_all should be always in the main.py, from where we run the app.
-Base.metadata.create_all(bind=engine, checkfirst=True)
+schemas.Base.metadata.create_all(bind=engine, checkfirst=True)
 get_initial_db = next(database_gen())
 if get_initial_db.query(schemas.Post).all() == []:
-    init_db(Base, engine, get_initial_db)
+    init_db(schemas.Base, engine, get_initial_db)
 
 #####################    Adding a Postgres db datasource to Grafana     #######################
 grafana = Grafana()
@@ -32,7 +34,7 @@ prometheus_db = PrometheusDB(filename="./prometheus/config.ini", section="promet
 grafana.add_prometheus_source(prometheus_db)
 print(grafana.get_all_datasources_info())
 #####################      Simulating a stream of posts    ##################################
-stream_mocker(get_initial_db)
+asyncio.create_task(stream_mocker(get_initial_db))
 
 ##############################    Creatng FastAPI App   ##########################
 app = FastAPI()

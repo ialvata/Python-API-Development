@@ -14,12 +14,29 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
 @router.get("/", response_model=list[posts.PostResponse])
-def get_all_posts(db_session: Session = Depends(database_gen)):
+def get_posts(
+    restrict_user: bool,  # query parameter and not a path operation
+    num_posts: int = 10,
+    db_session: Session = Depends(database_gen),
+    token_data: TokenData = Depends(get_current_user),
+):
     """
-    function docstring
+    restric_user: If True, then we only show posts for the user that's logged in.
+    num_posts: number of posts to show.
+
+    To implement pagination in results, we should use .offset(num_pag) in the query below,
+    where the results thrown will be offsetted by num_pag:int.
     """
-    posts = db_session.query(schemas.Post).all()
-    # .execute("SELECT * FROM posts")
+    if restrict_user:
+        posts = (
+            db_session.query(schemas.Post)
+            .where(schemas.Post.username == token_data.username)
+            .limit(num_posts)
+            .all()
+        )
+    else:
+        posts = db_session.query(schemas.Post).limit(num_posts).all()
+
     return posts
 
 
@@ -68,7 +85,6 @@ def get_post(identifier: int, db_session: Session = Depends(database_gen)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {identifier} not found!",
         )
-    # response.status_code = status.HTTP_404_NOT_FOUND
     return post_wanted
 
 
@@ -88,13 +104,16 @@ def delete_post(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {identifier} not found!",
         )
+    if post_wanted.username != token_data.username:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Logged username different from post owner username!",
+        )
     db_session.delete(post_wanted)
     db_session.commit()
 
 
-@router.patch(
-    "/{identifier}", status_code=status.HTTP_200_OK, response_model=posts.PostResponse
-)
+@router.patch("/", status_code=status.HTTP_200_OK, response_model=posts.PostResponse)
 def patch_post(
     identifier: int,
     payload: posts.PostUpdate,
@@ -104,14 +123,20 @@ def patch_post(
     """
     function docstring
     """
-    post_wanted = db_session.query(schemas.Post).where(schemas.Post.id == identifier)
-    if post_wanted.first() is None:
+    post_wanted_query = db_session.query(schemas.Post).where(schemas.Post.id == identifier)
+    post_wanted = post_wanted_query.first()
+    if post_wanted is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {identifier} not found!",
         )
+    if post_wanted.username != token_data.username:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Logged username different from post owner username!",
+        )
     # pylance type checker says that payload.dict() is incompatible with type of `values` from
     # update... hence the extra dict()
-    post_wanted.update(dict(payload.dict()), synchronize_session=False)
+    post_wanted_query.update(dict(payload.dict()), synchronize_session=False)
     db_session.commit()
-    return post_wanted.first()
+    return post_wanted

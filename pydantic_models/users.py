@@ -25,6 +25,7 @@ class UserCreate(UserBase):
     Class responsible for the `posts` table in the PostgreSQL DB
     """
 
+    username: str
     password: str
 
 
@@ -34,6 +35,7 @@ class UserResponse(UserBase):
     """
 
     id: int
+    username: str
     email: EmailStr
     created_at: datetime
 
