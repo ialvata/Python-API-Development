@@ -49,7 +49,9 @@ class Post(Base):
 
     __tablename__ = "posts"
     id: Mapped[int] = mapped_column(primary_key=True, index=True, nullable=False)
-    username: Mapped[str] = mapped_column(ForeignKey("users_table.username"))
+    username: Mapped[str] = mapped_column(
+        ForeignKey("users_table.username", ondelete="CASCADE")
+    )
     title: Mapped[str] = mapped_column()
     content: Mapped[str] = mapped_column()
     published: Mapped[bool] = mapped_column(server_default="TRUE")

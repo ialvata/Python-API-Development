@@ -17,8 +17,11 @@ class PostgresCredentials:
 
 
 pg_cred = PostgresCredentials()
-POSTGRESQL_DATABASE_URL = f"""postgresql://{pg_cred.postgres_user}:\
-    {pg_cred.postgres_password}@localhost/{pg_cred.postgres_database_name}"""
+POSTGRESQL_DATABASE_URL = (
+    f"postgresql://{pg_cred.postgres_user}:"
+    f"{pg_cred.postgres_password}@localhost/{pg_cred.postgres_database_name}"
+)
+
 
 engine = create_engine(POSTGRESQL_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

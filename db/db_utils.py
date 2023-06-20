@@ -65,7 +65,7 @@ def stream_mocker(db_session):
     myposts = [
         Post_pydantic(
             title=f"title_{idx}",
-            username=f"user_{int(uniform(0, 9))}",
+            username=f"user_{int(uniform(1, 9))}",
             content=f"content_{idx}",
             rating=uniform(0, 100),
         )
