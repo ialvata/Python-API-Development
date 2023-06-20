@@ -7,7 +7,7 @@ from __future__ import annotations
 import datetime
 
 from sqlalchemy import TIMESTAMP, ForeignKey, Integer
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.sql.expression import text
 
 # from typing import List
@@ -52,6 +52,12 @@ class Post(Base):
     username: Mapped[str] = mapped_column(
         ForeignKey("users_table.username", ondelete="CASCADE")
     )
+    user: Mapped["User"] = relationship(back_populates="posts")
+    # To establish a bidirectional relationship in one-to-many,
+    # where the “reverse” side is a many to one, we must specify an additional relationship()
+    # in Post table and connect the two using the relationship.back_populates parameter,
+    # and using the attribute name of each relationship() as the value for
+    # relationship.back_populates on the other
     title: Mapped[str] = mapped_column()
     content: Mapped[str] = mapped_column()
     published: Mapped[bool] = mapped_column(server_default="TRUE")
@@ -67,6 +73,7 @@ class User(Base):
     """
 
     __tablename__ = "users_table"
+    posts: Mapped[list["Post"]] = relationship(back_populates="user")
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True, nullable=False)
     username: Mapped[str] = mapped_column(unique=True, nullable=False)
     email: Mapped[str] = mapped_column(unique=True, nullable=False)

@@ -35,6 +35,7 @@ class UserResponse(UserBase):
     """
 
     id: int
+    username: str
     email: EmailStr
     created_at: datetime
 

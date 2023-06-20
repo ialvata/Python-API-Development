@@ -7,6 +7,8 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+from pydantic_models.users import UserResponse
+
 
 class PostBase(BaseModel):
     """
@@ -44,8 +46,9 @@ class PostResponse(PostBase):
 
     # remaining attributes like content and title will be inherited from PostBase
     id: int
-    username: str
     created_at: datetime
+    user: UserResponse
+    # with the relationship in Post schema, this user output is automatically implemented
 
     class Config:
         """
