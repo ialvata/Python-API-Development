@@ -107,9 +107,7 @@ def delete_post(
     db_session.commit()
 
 
-@router.patch(
-    "/{identifier}", status_code=status.HTTP_200_OK, response_model=posts.PostResponse
-)
+@router.patch("/", status_code=status.HTTP_200_OK, response_model=posts.PostResponse)
 def patch_post(
     identifier: int,
     payload: posts.PostUpdate,
@@ -119,14 +117,20 @@ def patch_post(
     """
     function docstring
     """
-    post_wanted = db_session.query(schemas.Post).where(schemas.Post.id == identifier)
-    if post_wanted.first() is None:
+    post_wanted_query = db_session.query(schemas.Post).where(schemas.Post.id == identifier)
+    post_wanted = post_wanted_query.first()
+    if post_wanted is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {identifier} not found!",
         )
+    if post_wanted.username != token_data.username:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Logged username different from post owner username!",
+        )
     # pylance type checker says that payload.dict() is incompatible with type of `values` from
     # update... hence the extra dict()
-    post_wanted.update(dict(payload.dict()), synchronize_session=False)
+    post_wanted_query.update(dict(payload.dict()), synchronize_session=False)
     db_session.commit()
-    return post_wanted.first()
+    return post_wanted
