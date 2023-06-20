@@ -14,23 +14,26 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
 @router.get("/", response_model=list[posts.PostResponse])
-def get_all_posts(
-    all: bool,  # query parameter and not a path operation
+def get_posts(
+    restrict_user: bool,  # query parameter and not a path operation
+    num_posts: int = 10,
     db_session: Session = Depends(database_gen),
     token_data: TokenData = Depends(get_current_user),
 ):
     """
-    function docstring
+    restric_user: If True, then we only show posts for the user that's logged in.
+    num_posts: number of posts to show.
     """
-    if all:
-        posts = db_session.query(schemas.Post).all()
-    else:
+    if restrict_user:
         posts = (
             db_session.query(schemas.Post)
             .where(schemas.Post.username == token_data.username)
+            .limit(num_posts)
             .all()
         )
-    # .execute("SELECT * FROM posts")
+    else:
+        posts = db_session.query(schemas.Post).limit(num_posts).all()
+
     return posts
 
 
