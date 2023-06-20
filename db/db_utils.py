@@ -1,8 +1,9 @@
 """
 Module with all the boilerplate code to start a SQLAlchemy session in the PostgreSQL DB
 """
+from asyncio import sleep
 from random import uniform
-from time import sleep
+from time import sleep as time_sleep
 
 from pydantic import EmailStr
 from sqlalchemy import Engine
@@ -30,7 +31,7 @@ def init_db(base, engine: Engine, db_session):
     ]
     print("Adding users and committing them")
     for index, user in enumerate(myusers):
-        sleep(uniform(0, 1))
+        time_sleep(uniform(0, 1))
         print(f"User with index ->{index}")
         db_session.add(User_sql(**(user.dict())))
         db_session.commit()
@@ -48,7 +49,7 @@ def init_db(base, engine: Engine, db_session):
     ]
     print("Adding posts and committing them")
     for index, post in enumerate(myposts):
-        sleep(uniform(0, 1))
+        time_sleep(uniform(0, 1))
         print(f"Post with index ->{index}")
         db_session.add(Post_sql(**(post.dict())))
         db_session.commit()
@@ -56,7 +57,7 @@ def init_db(base, engine: Engine, db_session):
     print("Initialized the db")
 
 
-def stream_mocker(db_session):
+async def stream_mocker(db_session):
     """
     Function to create some initial data in the DB
     """
@@ -73,7 +74,7 @@ def stream_mocker(db_session):
     ]
     print("Adding posts and commiting them")
     for index, post in enumerate(myposts):
-        sleep(uniform(0, 5))
+        await sleep(uniform(0, 5))
         print(f"Post with index ->{index}")
         db_session.add(Post_sql(**(post.dict())))
         db_session.commit()

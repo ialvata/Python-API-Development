@@ -2,6 +2,8 @@
 Module Docstring
 """
 
+import asyncio
+
 import uvicorn
 from fastapi import FastAPI
 
@@ -32,7 +34,7 @@ prometheus_db = PrometheusDB(filename="./prometheus/config.ini", section="promet
 grafana.add_prometheus_source(prometheus_db)
 print(grafana.get_all_datasources_info())
 #####################      Simulating a stream of posts    ##################################
-stream_mocker(get_initial_db)
+asyncio.create_task(stream_mocker(get_initial_db))
 
 ##############################    Creatng FastAPI App   ##########################
 app = FastAPI()
