@@ -23,6 +23,9 @@ def get_posts(
     """
     restric_user: If True, then we only show posts for the user that's logged in.
     num_posts: number of posts to show.
+
+    To implement pagination in results, we should use .offset(num_pag) in the query below,
+    where the results thrown will be offsetted by num_pag:int.
     """
     if restrict_user:
         posts = (
