@@ -25,6 +25,7 @@ class PostCreate(PostBase):
     """
 
     title: str
+    username: str
     content: str
     published: bool = True
     rating: float = 0

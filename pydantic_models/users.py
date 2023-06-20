@@ -25,6 +25,7 @@ class UserCreate(UserBase):
     Class responsible for the `posts` table in the PostgreSQL DB
     """
 
+    username: str
     password: str
 
 
