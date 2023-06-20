@@ -98,7 +98,7 @@ def delete_post(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {identifier} not found!",
         )
-    if post_wanted.username == token_data.username:
+    if post_wanted.username != token_data.username:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Logged username different from post owner username!",
