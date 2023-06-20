@@ -47,7 +47,7 @@ def verify_access_token(token: str, credentials_exception: HTTPException):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         print(payload)
-        username: str = payload.get("email")
+        username = payload.get("email")
         if username is None:
             raise credentials_exception
         token_data = TokenData(username=username)
@@ -64,6 +64,10 @@ def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    token = verify_access_token(token, credentials_exception)
-    user = db_session.query(schemas.User).filter(schemas.User.email == token.username).first()
+    token_data = verify_access_token(token, credentials_exception)
+    user = (
+        db_session.query(schemas.User)
+        .filter(schemas.User.email == token_data.username)
+        .first()
+    )
     return user

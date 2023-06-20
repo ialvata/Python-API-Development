@@ -44,6 +44,7 @@ class PostResponse(PostBase):
 
     # remaining attributes like content and title will be inherited from PostBase
     id: int
+    username: str
     created_at: datetime
 
     class Config:

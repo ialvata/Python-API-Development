@@ -14,11 +14,22 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
 @router.get("/", response_model=list[posts.PostResponse])
-def get_all_posts(db_session: Session = Depends(database_gen)):
+def get_all_posts(
+    all: bool,  # query parameter and not a path operation
+    db_session: Session = Depends(database_gen),
+    token_data: TokenData = Depends(get_current_user),
+):
     """
     function docstring
     """
-    posts = db_session.query(schemas.Post).all()
+    if all:
+        posts = db_session.query(schemas.Post).all()
+    else:
+        posts = (
+            db_session.query(schemas.Post)
+            .where(schemas.Post.username == token_data.username)
+            .all()
+        )
     # .execute("SELECT * FROM posts")
     return posts
 
@@ -68,7 +79,6 @@ def get_post(identifier: int, db_session: Session = Depends(database_gen)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {identifier} not found!",
         )
-    # response.status_code = status.HTTP_404_NOT_FOUND
     return post_wanted
 
 
@@ -87,6 +97,11 @@ def delete_post(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {identifier} not found!",
+        )
+    if post_wanted.username == token_data.username:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Logged username different from post owner username!",
         )
     db_session.delete(post_wanted)
     db_session.commit()
