@@ -157,7 +157,7 @@ def patch_post(
             detail="Logged username different from post owner username!",
         )
     # pylance type checker says that payload.dict() is incompatible with type of `values` from
-    # update... hence the extra dict()
+    # update...  hence the extra dict()
     post_wanted_query.update(dict(payload.dict()), synchronize_session=False)
     db_session.commit()
     return post_wanted
