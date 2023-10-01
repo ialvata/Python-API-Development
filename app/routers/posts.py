@@ -15,7 +15,7 @@ from pydantic_models import posts
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
-@router.get("/", response_model=list[posts.PostResponse])
+@router.get("/", status_code=status.HTTP_200_OK, response_model=list[posts.PostResponse])
 def get_posts(
     restrict_user: bool,  # query parameter and not a path operation
     num_posts: int = 10,
