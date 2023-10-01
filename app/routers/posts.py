@@ -1,6 +1,8 @@
 """
 Module responsible for Posts related operations
 """
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -17,6 +19,8 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 def get_posts(
     restrict_user: bool,  # query parameter and not a path operation
     num_posts: int = 10,
+    skip: int = 0,
+    search: Optional[str] = "",
     db_session: Session = Depends(database_gen),
     token_data: TokenData = Depends(get_current_user),
 ):
@@ -30,12 +34,22 @@ def get_posts(
     if restrict_user:
         posts = (
             db_session.query(schemas.Post)
-            .where(schemas.Post.username == token_data.username)
+            .where(
+                schemas.Post.username == token_data.username,
+                schemas.Post.title.contains(search),
+            )
+            .offset(skip)
             .limit(num_posts)
             .all()
         )
     else:
-        posts = db_session.query(schemas.Post).limit(num_posts).all()
+        posts = (
+            db_session.query(schemas.Post)
+            .where(schemas.Post.title.contains(search))
+            .limit(num_posts)
+            .offset(skip)
+            .all()
+        )
 
     return posts
 
