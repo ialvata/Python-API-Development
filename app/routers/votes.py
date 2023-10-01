@@ -27,10 +27,15 @@ def vote(
     ----------
     current_user:.
     """
+    post = db_session.query(schemas.Post).filter(schemas.Post.id == vote.post_id).first()
+    if not post:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id: {vote.post_id} does not exist",
+        )
     vote_query = db_session.query(schemas.Vote).filter(
         schemas.Vote.post_id == vote.post_id, schemas.Vote.user_id == current_user.id
     )
-
     found_vote = vote_query.first()
     if vote.dir == 1:
         if found_vote:
