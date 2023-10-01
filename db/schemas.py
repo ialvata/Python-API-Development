@@ -66,6 +66,9 @@ class Post(Base):
         nullable=False, server_default=text("now()")
     )
 
+    def __repr__(self) -> str:
+        return f"Post(id = {self.id}, username = {self.username})"
+
 
 class User(Base):
     """
