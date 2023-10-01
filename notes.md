@@ -22,9 +22,9 @@ To install psycopg2, we first install:
 
 # Running the App
 1- While in the directory, run:
-        Docker Compose up
+        `docker compose up`
 2- Activate our server app:
-        uvicorn app.main:app --reload
+        `uvicorn app.main:app --reload`
     If you want to access the server app:
         http://localhost:8000/
 
