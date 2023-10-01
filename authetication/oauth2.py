@@ -46,7 +46,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 def verify_access_token(token: str, credentials_exception: HTTPException):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        print(payload)
         username = payload.get("email")
         if username is None:
             raise credentials_exception
@@ -58,7 +57,7 @@ def verify_access_token(token: str, credentials_exception: HTTPException):
 
 def get_current_user(
     token: str = Depends(auth_scheme), db_session: Session = Depends(database_gen)
-):
+) -> schemas.User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -70,4 +69,5 @@ def get_current_user(
         .filter(schemas.User.email == token_data.username)
         .first()
     )
-    return user
+    # verify_access_token already checks whether user is None or not...
+    return user  # type: ignore
