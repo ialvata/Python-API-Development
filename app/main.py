@@ -7,7 +7,7 @@ import asyncio
 import uvicorn
 from fastapi import FastAPI
 
-from app.routers import auth, posts, users
+from app.routers import auth, posts, users, votes
 from db import schemas
 from db.db_orm import database_gen, engine
 from db.db_utils import init_db, stream_mocker
@@ -42,6 +42,7 @@ app = FastAPI()
 app.include_router(posts.router)
 app.include_router(users.router)
 app.include_router(auth.router)
+app.include_router(votes.router)
 
 
 @app.get("/")

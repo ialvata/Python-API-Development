@@ -66,10 +66,13 @@ class Post(Base):
         nullable=False, server_default=text("now()")
     )
 
+    def __repr__(self) -> str:
+        return f"Post(id = {self.id}, username = {self.username})"
+
 
 class User(Base):
     """
-    Class responsible for the `posts` table in the PostgreSQL DB
+    Class responsible for the `users_table` table in the PostgreSQL DB
     """
 
     __tablename__ = "users_table"
@@ -81,3 +84,23 @@ class User(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(
         nullable=False, server_default=text("now()")
     )
+
+
+class Vote(Base):
+    __tablename__ = "votes"
+    username: Mapped[str] = mapped_column(
+        ForeignKey("users_table.username", ondelete="CASCADE"),
+        primary_key=True,
+        nullable=False,
+    )
+    user_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("users_table.id", ondelete="CASCADE"),
+        primary_key=True,
+        nullable=False,
+    )
+    post_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("posts.id", ondelete="CASCADE"), primary_key=True, nullable=False
+    )
+    published: Mapped[bool] = mapped_column(server_default="TRUE")
+    rating: Mapped[float] = mapped_column(server_default="0")

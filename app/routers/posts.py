@@ -1,22 +1,29 @@
 """
 Module responsible for Posts related operations
 """
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from authetication.oauth2 import TokenData, get_current_user
 from db import schemas
 from db.db_orm import database_gen
 from pydantic_models import posts
+from pydantic_models.posts import PostJoinResponse
 
 #################################        Router        ################################
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
-@router.get("/", response_model=list[posts.PostResponse])
+@router.get("/", status_code=status.HTTP_200_OK, response_model=list[PostJoinResponse])
 def get_posts(
-    restrict_user: bool,  # query parameter and not a path operation
+    # below we have query parameters and not path operations
     num_posts: int = 10,
+    skip: int = 0,
+    restrict_user: Optional[bool] = True,
+    search: Optional[str] = "",
     db_session: Session = Depends(database_gen),
     token_data: TokenData = Depends(get_current_user),
 ):
@@ -29,15 +36,29 @@ def get_posts(
     """
     if restrict_user:
         posts = (
-            db_session.query(schemas.Post)
-            .where(schemas.Post.username == token_data.username)
+            db_session.query(schemas.Post, func.count(schemas.Vote.post_id).label("votes"))
+            .join(schemas.Vote, schemas.Vote.post_id == schemas.Post.id, isouter=True)
+            .group_by(schemas.Post.id)
+            .filter(
+                schemas.Post.username == token_data.username,
+                schemas.Post.title.contains(search),
+            )
             .limit(num_posts)
+            .offset(skip)
             .all()
         )
+        # this returns a list of tuples!!!
     else:
-        posts = db_session.query(schemas.Post).limit(num_posts).all()
-
-    return posts
+        posts = (
+            db_session.query(schemas.Post, func.count(schemas.Vote.post_id).label("votes"))
+            .join(schemas.Vote, schemas.Vote.post_id == schemas.Post.id, isouter=True)
+            .group_by(schemas.Post.id)
+            .filter(schemas.Post.title.contains(search))
+            .limit(num_posts)
+            .offset(skip)
+            .all()
+        )
+    return [PostJoinResponse(post=post[0], votes=post[1]) for post in posts]  # type: ignore
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=posts.PostResponse)
@@ -136,7 +157,7 @@ def patch_post(
             detail="Logged username different from post owner username!",
         )
     # pylance type checker says that payload.dict() is incompatible with type of `values` from
-    # update... hence the extra dict()
+    # update...  hence the extra dict()
     post_wanted_query.update(dict(payload.dict()), synchronize_session=False)
     db_session.commit()
     return post_wanted

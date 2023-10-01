@@ -64,3 +64,16 @@ class PostResponse(PostBase):
         """
 
         orm_mode = True
+
+
+class PostJoinResponse(BaseModel):
+    """
+    Pydantic class that represents a Post obtained from a Join SQL operation
+    """
+
+    post: PostResponse
+    votes: int
+
+    # with the relationship in Post schema, this user output is automatically implemented
+    def __repr__(self) -> str:
+        return f"PostJoinResponse(Post.id = {self.post.id}, votes = {self.votes})"
