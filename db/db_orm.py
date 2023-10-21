@@ -9,8 +9,8 @@ from sqlalchemy.orm import sessionmaker
 
 
 class PostgresCredentials:
-    def __init__(self) -> None:
-        load_dotenv(dotenv_path="./db/.env.local.db")
+    def __init__(self, path: str = "./db/.env.local.db") -> None:
+        load_dotenv(dotenv_path=path)
         self.postgres_user = os.environ["POSTGRES_USER"]
         self.postgres_password = os.environ["POSTGRES_PASSWORD"]
         self.postgres_database_name = os.environ["POSTGRES_DB"]

@@ -22,7 +22,8 @@ To install psycopg2, we first install:
 
 # Running the App
 1- While in the directory, run:
-        `docker compose up`
+        `docker compose --profile [dev|prod] up`
+    The `dev` profile will launch grafana and all integrations.
 2- Activate our server app:
         `uvicorn app.main:app --reload`
     If you want to access the server app:
@@ -34,6 +35,14 @@ We need an API key to validate almost any request.
 We'll be able to find them at /org/apikeys
 The usual url to access Grafana is:
     http://localhost:3000/
+
+# Running Tests
+1- While in the directory, run:
+        `docker compose --profile test up`
+2- Activate our server app:
+        `uvicorn app.main:app --reload`
+3- Run:
+        `pytest`
 
 
 # Environment Variables
