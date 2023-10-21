@@ -38,12 +38,13 @@ The usual url to access Grafana is:
 
 # Running Tests
 1- While in the directory, run:
-        `docker compose --profile test up`
+        `docker compose --env-file .env_test_docker --profile test up`
 2- Activate our server app:
         `uvicorn app.main:app --reload`
 3- Run:
         `pytest`
-
+4- To remove the containers, do:
+        `docker compose --env-file .env_test_docker --profile test up`
 
 # Environment Variables
 This project has two ways of accessing environmental variables:

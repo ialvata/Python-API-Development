@@ -19,8 +19,6 @@ services:
     container_name: postgres_test
     env_file:
       - ./db/.env.test.db
-    # environment:
-    #   - POSTGRES_TEST_PORT=$POSTGRES_TEST_PORT
     ports:
       - "${POSTGRES_TEST_PORT}:5432"
     profiles:
