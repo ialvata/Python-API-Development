@@ -96,7 +96,11 @@ def get_latest_post(db_session: Session = Depends(database_gen)):
 
 # identifier is an example of a path parameter
 @router.get("/{identifier}", response_model=posts.PostResponse)
-def get_post(identifier: int, db_session: Session = Depends(database_gen)):
+def get_post(
+    identifier: int,
+    db_session: Session = Depends(database_gen),
+    token_data: TokenData = Depends(get_current_user),
+):
     """
     Creates endpoint to fetch specific post
     """
