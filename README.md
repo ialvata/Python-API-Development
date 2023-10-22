@@ -7,11 +7,16 @@
 https://github.com/ialvata/Python-API-Development/assets/110241614/6ee51d95-4301-4857-9765-5784aa2d1548
 (Screenshot of YouTube Video Course)
 
+### Overview
+
+| **Open Source** | ![BSD 3-clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)
+|---|---|
+| **Tech Stack** | ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi) ![Grafana](https://img.shields.io/badge/grafana-%23F46800.svg?style=for-the-badge&logo=grafana&logoColor=white) ![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white) ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white) |
 
 
+This is my interpretation of the Python API Development 20h course from Sanjeev Thiyagarajan on Youtube. :) 
 
-This will be my interpretation of the Python API Development 20h course from Sanjeev Thiyagarajan on Youtube. :) 
-
+This project consists in a web app backend of a social message board type. We can create users, with their respective authentication credentials (OAuth 2.0), each user can post messages, and do the usual CRUD type of requests (subject to authentication) regarding the posts. They also have the possibility of voting on posts.
 
 
 ## Linear 
@@ -25,7 +30,7 @@ This project is (now) being planned and tracked, using Linear.app. See an exampl
 ## Pytest
 One thing that could be improved was leaving the pytest tests until the end... In my opinion, Sanjeev should have introduced the tests much earlier, and as he created the new methods, or operations, he could have explained a bit how to create useful tests.
 #### TODO:
-- Add Tests, and coverage report.
+- Add coverage report.
 
 ## FastAPI
 Sanjeev does not use async functions, but this is encouraged in FastAPI documentation.
