@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 import db.schemas as schemas
-from db.db_orm import database_gen
+from db.db_orm import database_gen  # type: ignore
 
 load_dotenv("app/.env_oauth2.py")
 
