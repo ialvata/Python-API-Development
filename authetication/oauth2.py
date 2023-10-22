@@ -46,7 +46,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 def verify_access_token(token: str, credentials_exception: HTTPException):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("email")
+        username = payload.get("username")
         if username is None:
             raise credentials_exception
         token_data = TokenData(username=username)
@@ -66,7 +66,7 @@ def get_current_user(
     token_data = verify_access_token(token, credentials_exception)
     user = (
         db_session.query(schemas.User)
-        .filter(schemas.User.email == token_data.username)
+        .filter(schemas.User.username == token_data.username)
         .first()
     )
     # verify_access_token already checks whether user is None or not...

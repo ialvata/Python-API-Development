@@ -21,7 +21,7 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 @pytest.fixture()
 def mock_session():
     print("Creating a Test Database Session")
-    Base.metadata.drop_all(bind=engine)
+    Base.metadata.drop_all(bind=engine)  # restart a clean new database
     Base.metadata.create_all(bind=engine, checkfirst=True)
     db = TestingSessionLocal()
     try:
@@ -47,7 +47,7 @@ def mock_client(mock_session: Session):
 def mock_user2(mock_client: TestClient) -> dict:
     # We're using the client fxture defined above
     user_data = {
-        "username": "Jonas",
+        "username": "Jonas123",
         "email": "sanjeev123@gmail.com",
         "password": "password123",
     }
@@ -61,7 +61,7 @@ def mock_user2(mock_client: TestClient) -> dict:
 @pytest.fixture
 def mock_user(mock_client: TestClient) -> dict:
     user_data = {"username": "Jonas", "email": "sanjeev@gmail.com", "password": "password123"}
-    res = mock_client.post("/users", json=user_data)
+    res = mock_client.post("/users/", json=user_data)
     assert res.status_code == 201
     new_user = res.json()
     new_user["password"] = user_data["password"]
@@ -70,22 +70,26 @@ def mock_user(mock_client: TestClient) -> dict:
 
 @pytest.fixture
 def mock_token(mock_user: dict):
-    return create_access_token({"user_id": mock_user["id"]})
+    return create_access_token({"username": mock_user["username"]})
 
 
 @pytest.fixture
-def mock_authorized_client(mock_client: TestClient, token: str):
-    mock_client.headers = {**mock_client.headers, "Authorization": f"Bearer {token}"}
+def mock_authorized_client(mock_client: TestClient, mock_token: str):
+    mock_client.headers = {**mock_client.headers, "authorization": f"Bearer {mock_token}"}
     return mock_client
 
 
 @pytest.fixture
-def test_posts(mock_user: dict, mock_session: Session, mock_user2: dict):
+def mock_posts(mock_user: dict, mock_session: Session, mock_user2: dict):
     posts_data = [
-        {"title": "first title", "content": "first content", "owner_id": mock_user["id"]},
-        {"title": "2nd title", "content": "2nd content", "owner_id": mock_user["id"]},
-        {"title": "3rd title", "content": "3rd content", "owner_id": mock_user["id"]},
-        {"title": "3rd title", "content": "3rd content", "owner_id": mock_user2["id"]},
+        {
+            "title": "first title",
+            "content": "first content",
+            "username": mock_user["username"],
+        },
+        {"title": "2nd title", "content": "2nd content", "username": mock_user["username"]},
+        {"title": "3rd title", "content": "3rd content", "username": mock_user["username"]},
+        {"title": "3rd title", "content": "3rd content", "username": mock_user2["username"]},
     ]
 
     def create_post_model(post):

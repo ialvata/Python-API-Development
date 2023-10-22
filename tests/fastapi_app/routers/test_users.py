@@ -12,7 +12,7 @@ from pydantic_models.users import UserResponse
 
 def test_create_user(mock_client: TestClient):
     res = mock_client.post(
-        "/users",
+        "/users/",
         json={"email": "hello123@gmail.com", "password": "password123", "username": "Jonas"},
     )
     print("res -> ", res.content)
