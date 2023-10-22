@@ -11,6 +11,18 @@ services:
       - ./db/.env.local.db
     # instead, we could have created a `environment` section, with
     # with the env vars in .env.local.db file.
+    profiles:
+      - dev
+      - prod
+  postgres_test:
+    image: postgres:15.3-alpine
+    container_name: postgres_test
+    env_file:
+      - ./db/.env.test.db
+    ports:
+      - "${POSTGRES_TEST_PORT}:5432"
+    profiles:
+      - test
   grafana:
     image: grafana/grafana-enterprise:9.5.2
     container_name: grafana
@@ -21,6 +33,8 @@ services:
       - grafana_data:/usr/share/grafana/data
     env_file:
       - ./grafana/.env.local.grafana
+    profiles:
+      - dev
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -39,6 +53,8 @@ services:
     - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro # host path: container path
     depends_on:
     - cadvisor
+    profiles:
+      - dev
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
@@ -52,6 +68,8 @@ services:
     - /var/lib/docker/:/var/lib/docker:ro
     depends_on:
     - postgres
+    profiles:
+      - dev
 volumes:
   postgres_data:
   grafana_data:

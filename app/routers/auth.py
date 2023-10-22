@@ -24,7 +24,7 @@ def login(
     """
     user_present = (
         db_session.query(schemas.User)
-        .where(schemas.User.email == user_credentials.username)
+        .where(schemas.User.username == user_credentials.username)
         .first()
     )
     if user_present is None:
@@ -38,6 +38,6 @@ def login(
             detail="Invalid credentials!",
         )
     # create a token
-    access_token = create_access_token(data={"email": user_credentials.username})
+    access_token = create_access_token(data={"username": user_credentials.username})
     # return token
     return Token(access_token=access_token, token_type="Bearer")
